@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Orders from "./pages/Orders";
 import Alerts from "./pages/Alerts";
+import AlertsCenter from "./pages/AlertsCenter";
 import RealTimeMap from "./pages/RealTimeMap";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
@@ -36,6 +37,7 @@ const App = () => (
               </div>
             </div>
           } />
+          <Route path="/analytics" element={<AlertsCenter />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
