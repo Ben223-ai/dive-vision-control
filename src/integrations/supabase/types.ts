@@ -14,7 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      order_tracking_events: {
+        Row: {
+          created_at: string
+          description: string
+          event_time: string
+          event_type: string
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_time?: string
+          event_type: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_time?: string
+          event_type?: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_tracking_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          actual_delivery: string | null
+          carrier: string | null
+          created_at: string
+          destination: string
+          estimated_delivery: string | null
+          id: string
+          order_number: string
+          origin: string
+          progress: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_delivery?: string | null
+          carrier?: string | null
+          created_at?: string
+          destination: string
+          estimated_delivery?: string | null
+          id?: string
+          order_number: string
+          origin: string
+          progress?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_delivery?: string | null
+          carrier?: string | null
+          created_at?: string
+          destination?: string
+          estimated_delivery?: string | null
+          id?: string
+          order_number?: string
+          origin?: string
+          progress?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
