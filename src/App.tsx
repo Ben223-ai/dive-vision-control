@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Orders from "./pages/Orders";
+import Alerts from "./pages/Alerts";
 import RealTimeMap from "./pages/RealTimeMap";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
@@ -21,6 +22,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/alerts" element={<Alerts />} />
           <Route path="/map" element={
             <div className="min-h-screen bg-background flex">
               <Sidebar />

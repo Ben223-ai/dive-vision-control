@@ -14,6 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      alert_rules: {
+        Row: {
+          conditions: Json
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          rule_type: string
+          thresholds: Json
+          updated_at: string
+        }
+        Insert: {
+          conditions: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          rule_type: string
+          thresholds: Json
+          updated_at?: string
+        }
+        Update: {
+          conditions?: Json
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          rule_type?: string
+          thresholds?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      alerts: {
+        Row: {
+          acknowledged_at: string | null
+          alert_type: string
+          confidence_score: number | null
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          order_id: string | null
+          predicted_delay_hours: number | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          triggered_at: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          alert_type: string
+          confidence_score?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          predicted_delay_hours?: number | null
+          resolved_at?: string | null
+          severity: string
+          status?: string
+          title: string
+          triggered_at?: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          alert_type?: string
+          confidence_score?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          order_id?: string | null
+          predicted_delay_hours?: number | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          triggered_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_tracking_events: {
         Row: {
           created_at: string

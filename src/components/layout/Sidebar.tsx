@@ -26,7 +26,7 @@ export default function Sidebar({ className }: SidebarProps) {
     { name: "仪表盘", href: "/", icon: LayoutDashboard, current: location.pathname === "/" },
     { name: "实时地图", href: "/map", icon: MapPin, current: location.pathname === "/map" },
     { name: "订单追踪", href: "/orders", icon: Package, current: location.pathname === "/orders" },
-    { name: "智能预警", href: "/alerts", icon: AlertTriangle, current: false },
+    { name: "智能预警", href: "/alerts", icon: AlertTriangle, current: location.pathname === "/alerts" },
     { name: "数据分析", href: "/analytics", icon: BarChart3, current: false },
     { name: "协同通信", href: "/communication", icon: MessageSquare, current: false },
     { name: "系统设置", href: "/settings", icon: Settings, current: false },

@@ -6,19 +6,30 @@ import { Progress } from "@/components/ui/progress";
 import { Truck, MapPin, Clock, MoreHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import AlertIndicator from "@/components/alerts/AlertIndicator";
 
 interface Order {
   id: string;
   order_number: string;
+  customer_name: string;
   origin: string;
   destination: string;
   status: string;
   carrier: string;
   created_at: string;
   estimated_delivery: string;
+  total_amount: number;
   actual_delivery?: string;
   updated_at: string;
-  progress?: number;
+  weight?: number;
+  volume?: number;
+  alerts?: Array<{
+    id: string;
+    alert_type: string;
+    severity: string;
+    title: string;
+    confidence_score?: number;
+  }>;
 }
 
 const getStatusColor = (status: string) => {
@@ -84,14 +95,22 @@ export default function OrderList() {
     try {
       const { data, error } = await supabase
         .from("orders")
-        .select("*")
+        .select(`
+          *,
+          alerts:alerts!alerts_order_id_fkey(id, alert_type, severity, title, confidence_score, status)
+        `)
         .order("created_at", { ascending: false })
         .limit(10);
 
       if (error) {
         console.error("Error fetching orders:", error);
       } else {
-        setOrders(data || []);
+        // Filter only active alerts
+        const ordersWithActiveAlerts = (data || []).map(order => ({
+          ...order,
+          alerts: order.alerts?.filter((alert: any) => alert.status === 'active') || []
+        }));
+        setOrders(ordersWithActiveAlerts);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -137,7 +156,7 @@ export default function OrderList() {
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  订单 #{order.order_number}
+                  {order.customer_name}
                 </p>
               </div>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -164,13 +183,20 @@ export default function OrderList() {
               )}
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 mb-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-muted-foreground">运输进度</span>
                 <span className="text-muted-foreground">{getProgress(order.status)}%</span>
               </div>
               <Progress value={getProgress(order.status)} className="h-2" />
             </div>
+
+            {/* Alert Indicator */}
+            <AlertIndicator 
+              orderId={order.id}
+              orderNumber={order.order_number}
+              alerts={order.alerts}
+            />
           </div>
         ))}
         <Button variant="outline" className="w-full mt-4">
