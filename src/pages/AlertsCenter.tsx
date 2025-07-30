@@ -9,6 +9,7 @@ import { AlertTriangle, Clock, MapPin, CheckCircle, X, Search, Filter, Brain, Tr
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import AlertRulesManager from "@/components/alerts/AlertRulesManager";
+import AlertAnalytics from "@/components/alerts/AlertAnalytics";
 
 interface Alert {
   id: string;
@@ -416,17 +417,7 @@ export default function AlertsCenter() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <CardTitle>预警分析</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8">
-                <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">预警趋势分析和AI模型性能指标即将推出</p>
-              </div>
-            </CardContent>
-          </Card>
+          <AlertAnalytics />
         </TabsContent>
       </Tabs>
     </div>
