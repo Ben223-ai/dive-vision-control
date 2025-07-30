@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Clock, MapPin, CheckCircle, X, Search, Filter, Brain, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import AlertRulesManager from "@/components/alerts/AlertRulesManager";
 
 interface Alert {
   id: string;
@@ -411,34 +412,7 @@ export default function AlertsCenter() {
         </TabsContent>
 
         <TabsContent value="rules" className="space-y-4">
-          <Card className="shadow-elegant">
-            <CardHeader>
-              <CardTitle>预警规则配置</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {alertRules.map((rule) => (
-                <div
-                  key={rule.id}
-                  className="p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-foreground">
-                      {rule.name}
-                    </h4>
-                    <Badge variant={rule.enabled ? "default" : "secondary"}>
-                      {rule.enabled ? "启用" : "禁用"}
-                    </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {rule.description}
-                  </p>
-                  <div className="text-xs text-muted-foreground">
-                    规则类型: {rule.rule_type}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+          <AlertRulesManager />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
