@@ -10,18 +10,15 @@ import { cn } from "@/lib/utils";
 interface Order {
   id: string;
   order_number: string;
-  customer_name: string;
   origin: string;
   destination: string;
   status: string;
   carrier: string;
   created_at: string;
   estimated_delivery: string;
-  total_amount: number;
   actual_delivery?: string;
   updated_at: string;
-  weight?: number;
-  volume?: number;
+  progress?: number;
 }
 
 interface TrackingEvent {
@@ -29,7 +26,7 @@ interface TrackingEvent {
   event_type: string;
   description: string;
   location: string;
-  timestamp: string;
+  event_time: string;
   created_at: string;
   latitude?: number;
   longitude?: number;
@@ -118,7 +115,7 @@ export default function OrderTracker() {
         .from("order_tracking_events")
         .select("*")
         .eq("order_id", order.id)
-        .order("timestamp", { ascending: true });
+        .order("event_time", { ascending: true });
 
       if (eventsError) {
         console.error("Error fetching tracking events:", eventsError);
@@ -178,8 +175,8 @@ export default function OrderTracker() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-muted-foreground">客户名称</p>
-                <p className="font-medium">{selectedOrder.customer_name}</p>
+                <p className="text-sm text-muted-foreground">订单进度</p>
+                <p className="font-medium">{selectedOrder.progress || 0}%</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">承运商</p>
@@ -194,8 +191,8 @@ export default function OrderTracker() {
                 <p className="font-medium">{selectedOrder.destination}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">订单金额</p>
-                <p className="font-medium">¥{selectedOrder.total_amount?.toFixed(2) || "0.00"}</p>
+                <p className="text-sm text-muted-foreground">创建时间</p>
+                <p className="font-medium">{new Date(selectedOrder.created_at).toLocaleDateString('zh-CN')}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">预计送达</p>
@@ -233,7 +230,7 @@ export default function OrderTracker() {
                         {event.description}
                       </h4>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(event.timestamp).toLocaleString('zh-CN')}
+                        {new Date(event.event_time).toLocaleString('zh-CN')}
                       </span>
                     </div>
                     {event.location && (

@@ -10,18 +10,15 @@ import { cn } from "@/lib/utils";
 interface Order {
   id: string;
   order_number: string;
-  customer_name: string;
   origin: string;
   destination: string;
   status: string;
   carrier: string;
   created_at: string;
   estimated_delivery: string;
-  total_amount: number;
   actual_delivery?: string;
   updated_at: string;
-  weight?: number;
-  volume?: number;
+  progress?: number;
 }
 
 const getStatusColor = (status: string) => {
@@ -140,7 +137,7 @@ export default function OrderList() {
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {order.customer_name}
+                  订单 #{order.order_number}
                 </p>
               </div>
               <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
