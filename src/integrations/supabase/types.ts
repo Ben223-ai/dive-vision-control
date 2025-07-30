@@ -63,6 +63,7 @@ export type Database = {
           actual_delivery: string | null
           carrier: string | null
           created_at: string
+          customer_name: string | null
           destination: string
           estimated_delivery: string | null
           id: string
@@ -70,12 +71,16 @@ export type Database = {
           origin: string
           progress: number | null
           status: string
+          total_amount: number | null
           updated_at: string
+          volume: number | null
+          weight: number | null
         }
         Insert: {
           actual_delivery?: string | null
           carrier?: string | null
           created_at?: string
+          customer_name?: string | null
           destination: string
           estimated_delivery?: string | null
           id?: string
@@ -83,12 +88,16 @@ export type Database = {
           origin: string
           progress?: number | null
           status?: string
+          total_amount?: number | null
           updated_at?: string
+          volume?: number | null
+          weight?: number | null
         }
         Update: {
           actual_delivery?: string | null
           carrier?: string | null
           created_at?: string
+          customer_name?: string | null
           destination?: string
           estimated_delivery?: string | null
           id?: string
@@ -96,7 +105,10 @@ export type Database = {
           origin?: string
           progress?: number | null
           status?: string
+          total_amount?: number | null
           updated_at?: string
+          volume?: number | null
+          weight?: number | null
         }
         Relationships: []
       }
