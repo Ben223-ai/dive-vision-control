@@ -9,6 +9,8 @@ import {
 import StatsCard from "@/components/dashboard/StatsCard";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import RecentOrders from "@/components/dashboard/RecentOrders";
+import OrderTracker from "@/components/order-tracking/OrderTracker";
+import OrderList from "@/components/order-tracking/OrderList";
 
 export default function Dashboard() {
   return (
@@ -47,6 +49,16 @@ export default function Dashboard() {
           icon={TrendingUp}
           description="本月平均准时送达率"
         />
+      </div>
+
+      {/* Order Tracking Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <OrderTracker />
+        </div>
+        <div>
+          <OrderList />
+        </div>
       </div>
 
       {/* Main Content Grid */}
