@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
@@ -11,17 +12,7 @@ import {
   Settings,
   Menu,
   X
-} from "lucide-react";
-
-const navigation = [
-  { name: "仪表盘", href: "/", icon: LayoutDashboard, current: window.location.pathname === "/" },
-  { name: "实时地图", href: "/map", icon: MapPin, current: window.location.pathname === "/map" },
-  { name: "订单追踪", href: "/orders", icon: Package, current: false },
-  { name: "智能预警", href: "/alerts", icon: AlertTriangle, current: false },
-  { name: "数据分析", href: "/analytics", icon: BarChart3, current: false },
-  { name: "协同通信", href: "/communication", icon: MessageSquare, current: false },
-  { name: "系统设置", href: "/settings", icon: Settings, current: false },
-];
+ } from "lucide-react";
 
 interface SidebarProps {
   className?: string;
@@ -29,6 +20,17 @@ interface SidebarProps {
 
 export default function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+
+  const navigation = [
+    { name: "仪表盘", href: "/", icon: LayoutDashboard, current: location.pathname === "/" },
+    { name: "实时地图", href: "/map", icon: MapPin, current: location.pathname === "/map" },
+    { name: "订单追踪", href: "/orders", icon: Package, current: location.pathname === "/orders" },
+    { name: "智能预警", href: "/alerts", icon: AlertTriangle, current: false },
+    { name: "数据分析", href: "/analytics", icon: BarChart3, current: false },
+    { name: "协同通信", href: "/communication", icon: MessageSquare, current: false },
+    { name: "系统设置", href: "/settings", icon: Settings, current: false },
+  ];
 
   return (
     <div className={cn(
@@ -64,20 +66,20 @@ export default function Sidebar({ className }: SidebarProps) {
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
-            <Button
-              key={item.name}
-              variant={item.current ? "default" : "ghost"}
-              className={cn(
-                "w-full justify-start h-10",
-                isCollapsed && "px-2"
-              )}
-              onClick={() => window.location.href = item.href}
-            >
-              <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
-              {!isCollapsed && (
-                <span className="text-sm">{item.name}</span>
-              )}
-            </Button>
+            <Link key={item.name} to={item.href}>
+              <Button
+                variant={item.current ? "default" : "ghost"}
+                className={cn(
+                  "w-full justify-start h-10",
+                  isCollapsed && "px-2"
+                )}
+              >
+                <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
+                {!isCollapsed && (
+                  <span className="text-sm">{item.name}</span>
+                )}
+              </Button>
+            </Link>
           );
         })}
       </nav>
