@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 
 const navigation = [
-  { name: "仪表盘", href: "/", icon: LayoutDashboard, current: true },
-  { name: "实时地图", href: "/map", icon: MapPin, current: false },
+  { name: "仪表盘", href: "/", icon: LayoutDashboard, current: window.location.pathname === "/" },
+  { name: "实时地图", href: "/map", icon: MapPin, current: window.location.pathname === "/map" },
   { name: "订单追踪", href: "/orders", icon: Package, current: false },
   { name: "智能预警", href: "/alerts", icon: AlertTriangle, current: false },
   { name: "数据分析", href: "/analytics", icon: BarChart3, current: false },
@@ -71,6 +71,7 @@ export default function Sidebar({ className }: SidebarProps) {
                 "w-full justify-start h-10",
                 isCollapsed && "px-2"
               )}
+              onClick={() => window.location.href = item.href}
             >
               <Icon className={cn("h-4 w-4", !isCollapsed && "mr-3")} />
               {!isCollapsed && (
