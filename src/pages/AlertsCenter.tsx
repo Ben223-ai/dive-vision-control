@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import AlertRulesManager from "@/components/alerts/AlertRulesManager";
 import AlertAnalytics from "@/components/alerts/AlertAnalytics";
+import TransportationKPIDashboard from "@/components/analytics/TransportationKPIDashboard";
+import OperationalCostAnalysis from "@/components/analytics/OperationalCostAnalysis";
+import CarrierPerformance from "@/components/analytics/CarrierPerformance";
 
 interface Alert {
   id: string;
@@ -278,6 +281,9 @@ export default function AlertsCenter() {
           <TabsTrigger value="alerts">预警列表</TabsTrigger>
           <TabsTrigger value="rules">预警规则</TabsTrigger>
           <TabsTrigger value="analytics">预警分析</TabsTrigger>
+          <TabsTrigger value="kpi">运输KPI</TabsTrigger>
+          <TabsTrigger value="costs">成本分析</TabsTrigger>
+          <TabsTrigger value="carriers">承运商绩效</TabsTrigger>
         </TabsList>
 
         <TabsContent value="alerts" className="space-y-4">
@@ -418,6 +424,18 @@ export default function AlertsCenter() {
 
         <TabsContent value="analytics" className="space-y-4">
           <AlertAnalytics />
+        </TabsContent>
+
+        <TabsContent value="kpi" className="space-y-4">
+          <TransportationKPIDashboard />
+        </TabsContent>
+
+        <TabsContent value="costs" className="space-y-4">
+          <OperationalCostAnalysis />
+        </TabsContent>
+
+        <TabsContent value="carriers" className="space-y-4">
+          <CarrierPerformance />
         </TabsContent>
       </Tabs>
     </div>
