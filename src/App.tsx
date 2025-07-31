@@ -9,6 +9,7 @@ import Alerts from "./pages/Alerts";
 import AlertsCenter from "./pages/AlertsCenter";
 import Analytics from "./pages/Analytics";
 import Communication from "./pages/Communication";
+import Settings from "./pages/Settings";
 import RealTimeMap from "./pages/RealTimeMap";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
@@ -41,6 +42,19 @@ const App = () => (
           } />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/communication" element={<Communication />} />
+          <Route path="/settings" element={
+            <div className="min-h-screen bg-background flex">
+              <Sidebar />
+              <div className="flex-1 flex flex-col">
+                <Header />
+                <main className="flex-1 p-6">
+                  <div className="max-w-4xl mx-auto">
+                    <Settings />
+                  </div>
+                </main>
+              </div>
+            </div>
+          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
