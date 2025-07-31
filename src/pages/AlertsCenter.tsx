@@ -215,10 +215,10 @@ export default function AlertsCenter() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">智能预警中心</h1>
-          <p className="text-muted-foreground">AI驱动的智能预警监控和管理</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">智能预警中心</h1>
+          <p className="text-sm text-muted-foreground">AI驱动的智能预警监控和管理</p>
         </div>
         <div className="flex items-center space-x-2">
           <Badge variant="destructive" className="text-sm">
@@ -228,48 +228,48 @@ export default function AlertsCenter() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card className="shadow-elegant">
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">总预警数</p>
-                <p className="text-2xl font-bold">{alertStats.total}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">总预警数</p>
+                <p className="text-lg sm:text-2xl font-bold">{alertStats.total}</p>
               </div>
-              <AlertTriangle className="h-8 w-8 text-muted-foreground" />
+              <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
         <Card className="shadow-elegant">
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">活跃预警</p>
-                <p className="text-2xl font-bold text-warning">{alertStats.active}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">活跃预警</p>
+                <p className="text-lg sm:text-2xl font-bold text-warning">{alertStats.active}</p>
               </div>
-              <Clock className="h-8 w-8 text-warning" />
+              <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-warning" />
             </div>
           </CardContent>
         </Card>
         <Card className="shadow-elegant">
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">高优先级</p>
-                <p className="text-2xl font-bold text-destructive">{alertStats.high}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">高优先级</p>
+                <p className="text-lg sm:text-2xl font-bold text-destructive">{alertStats.high}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-destructive" />
+              <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-destructive" />
             </div>
           </CardContent>
         </Card>
         <Card className="shadow-elegant">
-          <CardContent className="p-4">
+          <CardContent className="p-3 md:p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">紧急预警</p>
-                <p className="text-2xl font-bold text-destructive">{alertStats.critical}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">紧急预警</p>
+                <p className="text-lg sm:text-2xl font-bold text-destructive">{alertStats.critical}</p>
               </div>
-              <Brain className="h-8 w-8 text-destructive" />
+              <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-destructive" />
             </div>
           </CardContent>
         </Card>
@@ -277,20 +277,20 @@ export default function AlertsCenter() {
 
       {/* Main Content */}
       <Tabs defaultValue="alerts" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="alerts">预警列表</TabsTrigger>
-          <TabsTrigger value="rules">预警规则</TabsTrigger>
-          <TabsTrigger value="analytics">预警分析</TabsTrigger>
-          <TabsTrigger value="kpi">运输KPI</TabsTrigger>
-          <TabsTrigger value="costs">成本分析</TabsTrigger>
-          <TabsTrigger value="carriers">承运商绩效</TabsTrigger>
+        <TabsList className="grid grid-cols-2 md:grid-cols-6 h-auto">
+          <TabsTrigger value="alerts" className="text-xs md:text-sm">预警列表</TabsTrigger>
+          <TabsTrigger value="rules" className="text-xs md:text-sm">预警规则</TabsTrigger>
+          <TabsTrigger value="analytics" className="text-xs md:text-sm">预警分析</TabsTrigger>
+          <TabsTrigger value="kpi" className="text-xs md:text-sm">运输KPI</TabsTrigger>
+          <TabsTrigger value="costs" className="text-xs md:text-sm">成本分析</TabsTrigger>
+          <TabsTrigger value="carriers" className="text-xs md:text-sm">承运商绩效</TabsTrigger>
         </TabsList>
 
         <TabsContent value="alerts" className="space-y-4">
           {/* Filters */}
           <Card className="shadow-elegant">
-            <CardContent className="p-4">
-              <div className="flex flex-col md:flex-row gap-4">
+            <CardContent className="p-3 md:p-4">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
                 <div className="flex-1">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -298,12 +298,12 @@ export default function AlertsCenter() {
                       placeholder="搜索预警..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-sm"
                     />
                   </div>
                 </div>
                 <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full sm:w-48">
                     <Filter className="h-4 w-4 mr-2" />
                     <SelectValue placeholder="筛选状态" />
                   </SelectTrigger>
@@ -330,17 +330,17 @@ export default function AlertsCenter() {
                 return (
                   <div
                     key={alert.id}
-                    className="flex items-start space-x-4 p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                    className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-4 p-3 md:p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
                   >
                     <div className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-full",
+                      "flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full shrink-0",
                       getSeverityColor(alert.severity)
                     )}>
-                      <Icon className="h-5 w-5" />
+                      <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 space-y-2 sm:space-y-0">
+                        <div className="flex flex-wrap items-center gap-2">
                           <h4 className="text-sm font-medium text-foreground">
                             {alert.title}
                           </h4>
@@ -359,7 +359,7 @@ export default function AlertsCenter() {
                         {alert.description}
                       </p>
                       {alert.order && (
-                        <div className="flex items-center space-x-4 text-xs text-muted-foreground mb-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 text-xs text-muted-foreground mb-2">
                           <span>订单: {alert.order.order_number}</span>
                           <span>客户: {alert.order.customer_name}</span>
                           {alert.order.carrier && <span>承运商: {alert.order.carrier}</span>}
@@ -370,13 +370,14 @@ export default function AlertsCenter() {
                           AI置信度: {(alert.confidence_score * 100).toFixed(1)}%
                         </div>
                       )}
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {alert.status === "active" && (
                           <>
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => updateAlertStatus(alert.id, "acknowledged")}
+                              className="text-xs px-2 py-1 h-7"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               确认
@@ -385,6 +386,7 @@ export default function AlertsCenter() {
                               size="sm"
                               variant="outline"
                               onClick={() => updateAlertStatus(alert.id, "resolved")}
+                              className="text-xs px-2 py-1 h-7"
                             >
                               解决
                             </Button>
@@ -392,6 +394,7 @@ export default function AlertsCenter() {
                               size="sm"
                               variant="ghost"
                               onClick={() => updateAlertStatus(alert.id, "dismissed")}
+                              className="text-xs px-2 py-1 h-7"
                             >
                               <X className="h-3 w-3 mr-1" />
                               忽略
