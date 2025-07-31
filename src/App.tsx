@@ -8,6 +8,7 @@ import Orders from "./pages/Orders";
 import Alerts from "./pages/Alerts";
 import AlertsCenter from "./pages/AlertsCenter";
 import Analytics from "./pages/Analytics";
+import Communication from "./pages/Communication";
 import RealTimeMap from "./pages/RealTimeMap";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
@@ -39,6 +40,7 @@ const App = () => (
             </div>
           } />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/communication" element={<Communication />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
