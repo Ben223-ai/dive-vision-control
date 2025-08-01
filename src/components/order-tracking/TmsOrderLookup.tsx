@@ -170,6 +170,19 @@ export default function TmsOrderLookup() {
               
               <Separator />
 
+              {/* 调试信息 - 显示实际数据结构 */}
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-blue-800 mb-2">数据结构信息:</h4>
+                <div className="text-xs text-blue-700 space-y-1">
+                  <div>响应成功标志: {orderData.flag ? '是' : '否'}</div>
+                  <div>数据是否存在: {orderData.data ? '是' : '否'}</div>
+                  <div>数据类型: {typeof orderData.data}</div>
+                  {orderData.data && (
+                    <div>数据字段: {Object.keys(orderData.data).join(', ')}</div>
+                  )}
+                </div>
+              </div>
+
               {/* 订单基本信息 */}
               {orderData.data && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
