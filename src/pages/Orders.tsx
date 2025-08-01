@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header";
 import OrderTracker from "@/components/order-tracking/OrderTracker";
 import OrderList from "@/components/order-tracking/OrderList";
 import TmsOrderLookup from "@/components/order-tracking/TmsOrderLookup";
+import CreateOrderDialog from "@/components/order-tracking/CreateOrderDialog";
 
 const Orders = () => {
   return (
@@ -30,14 +31,9 @@ const Orders = () => {
                 
                 {/* 权限控制的操作按钮 */}
                 <div className="flex gap-2">
-                  <PermissionBtn
-                    permission={PERMISSIONS.ORDERS_CREATE}
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    创建订单
-                  </PermissionBtn>
+                  <PermissionGuard permission={PERMISSIONS.ORDERS_CREATE}>
+                    <CreateOrderDialog />
+                  </PermissionGuard>
                   
                   <PermissionBtn
                     permission={PERMISSIONS.ORDERS_EXPORT}
