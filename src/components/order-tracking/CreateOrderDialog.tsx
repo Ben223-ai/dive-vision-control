@@ -53,10 +53,26 @@ const CreateOrderDialog = () => {
         .select('id')
         .eq('template_type', 'order_create')
         .eq('is_default', true)
-        .single();
+        .limit(1);
 
       if (error) throw error;
-      setDefaultTemplateId(data.id);
+      
+      if (data && data.length > 0) {
+        setDefaultTemplateId(data[0].id);
+      } else {
+        // 如果没有默认模板，尝试获取任何order_create类型的模板
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('form_templates')
+          .select('id')
+          .eq('template_type', 'order_create')
+          .eq('is_active', true)
+          .limit(1);
+          
+        if (fallbackError) throw fallbackError;
+        if (fallbackData && fallbackData.length > 0) {
+          setDefaultTemplateId(fallbackData[0].id);
+        }
+      }
     } catch (error) {
       console.error('加载默认模板失败:', error);
     }
