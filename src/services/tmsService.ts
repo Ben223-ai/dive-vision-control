@@ -48,7 +48,7 @@ class TmsService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': this.config.authorization || this.config.token,
+          'Authorization': 'Token',
           'Token': this.config.token,
         },
         body: JSON.stringify(requestBody)
