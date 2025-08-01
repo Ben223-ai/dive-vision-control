@@ -266,6 +266,39 @@ export type Database = {
           },
         ]
       }
+      delivery_predictions: {
+        Row: {
+          confidence_score: number
+          created_at: string
+          id: string
+          model_version: string | null
+          order_id: string
+          predicted_delivery: string
+          prediction_factors: Json | null
+          updated_at: string
+        }
+        Insert: {
+          confidence_score: number
+          created_at?: string
+          id?: string
+          model_version?: string | null
+          order_id: string
+          predicted_delivery: string
+          prediction_factors?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          confidence_score?: number
+          created_at?: string
+          id?: string
+          model_version?: string | null
+          order_id?: string
+          predicted_delivery?: string
+          prediction_factors?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       form_fields: {
         Row: {
           created_at: string
@@ -616,6 +649,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      prediction_training_data: {
+        Row: {
+          actual_delivery: string | null
+          created_at: string
+          features: Json
+          id: string
+          order_id: string
+          predicted_delivery: string | null
+          prediction_error_hours: number | null
+        }
+        Insert: {
+          actual_delivery?: string | null
+          created_at?: string
+          features: Json
+          id?: string
+          order_id: string
+          predicted_delivery?: string | null
+          prediction_error_hours?: number | null
+        }
+        Update: {
+          actual_delivery?: string | null
+          created_at?: string
+          features?: Json
+          id?: string
+          order_id?: string
+          predicted_delivery?: string | null
+          prediction_error_hours?: number | null
+        }
+        Relationships: []
       }
       profiles: {
         Row: {

@@ -91,3 +91,6 @@ verify_jwt = false
 
 [functions.order-details-api]
 verify_jwt = false
+
+[functions.delivery-time-prediction]
+verify_jwt = false
