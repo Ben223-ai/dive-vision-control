@@ -172,7 +172,7 @@ export default function TmsOrderLookup() {
 
               {/* 订单基本信息 */}
               {orderData.data && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">基本信息</h4>
                     <div className="space-y-3">
@@ -182,10 +182,22 @@ export default function TmsOrderLookup() {
                           <span className="text-sm font-medium">{orderData.data.orderNo}</span>
                         </div>
                       )}
-                       {orderData.data.orderStatus && (
+                      {orderData.data.gid && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">订单GID:</span>
+                          <span className="text-sm font-mono bg-muted px-2 py-1 rounded">{orderData.data.gid}</span>
+                        </div>
+                      )}
+                      {orderData.data.orderStatus && (
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">订单状态:</span>
                           <Badge variant="secondary">{orderData.data.orderStatus}</Badge>
+                        </div>
+                      )}
+                      {orderData.data.orderType && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">订单类型:</span>
+                          <span className="text-sm">{orderData.data.orderType}</span>
                         </div>
                       )}
                       {orderData.data.createTime && (
@@ -194,10 +206,42 @@ export default function TmsOrderLookup() {
                           <span className="text-sm">{new Date(orderData.data.createTime).toLocaleString('zh-CN')}</span>
                         </div>
                       )}
+                      {orderData.data.updateTime && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">更新时间:</span>
+                          <span className="text-sm">{new Date(orderData.data.updateTime).toLocaleString('zh-CN')}</span>
+                        </div>
+                      )}
                       {orderData.data.customerName && (
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">客户名称:</span>
-                          <span className="text-sm">{orderData.data.customerName}</span>
+                          <span className="text-sm font-medium">{orderData.data.customerName}</span>
+                        </div>
+                      )}
+                      {orderData.data.customerCode && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">客户编码:</span>
+                          <span className="text-sm">{orderData.data.customerCode}</span>
+                        </div>
+                      )}
+                      {orderData.data.businessType && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">业务类型:</span>
+                          <span className="text-sm">{orderData.data.businessType}</span>
+                        </div>
+                      )}
+                      {orderData.data.priority && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">优先级:</span>
+                          <Badge variant={orderData.data.priority === '高' ? 'destructive' : 'outline'}>
+                            {orderData.data.priority}
+                          </Badge>
+                        </div>
+                      )}
+                      {orderData.data.remark && (
+                        <div className="space-y-1">
+                          <span className="text-sm text-muted-foreground">备注:</span>
+                          <p className="text-sm bg-muted p-2 rounded">{orderData.data.remark}</p>
                         </div>
                       )}
                     </div>
@@ -207,27 +251,117 @@ export default function TmsOrderLookup() {
                     <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">物流信息</h4>
                     <div className="space-y-3">
                       {orderData.data.fromAddress && (
-                        <div className="flex justify-between">
+                        <div className="space-y-1">
                           <span className="text-sm text-muted-foreground">发货地址:</span>
-                          <span className="text-sm text-right max-w-48">{orderData.data.fromAddress}</span>
+                          <p className="text-sm bg-muted p-2 rounded">{orderData.data.fromAddress}</p>
+                        </div>
+                      )}
+                      {orderData.data.fromContact && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">发货联系人:</span>
+                          <span className="text-sm">{orderData.data.fromContact}</span>
+                        </div>
+                      )}
+                      {orderData.data.fromPhone && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">发货电话:</span>
+                          <span className="text-sm font-mono">{orderData.data.fromPhone}</span>
                         </div>
                       )}
                       {orderData.data.toAddress && (
-                        <div className="flex justify-between">
+                        <div className="space-y-1">
                           <span className="text-sm text-muted-foreground">收货地址:</span>
-                          <span className="text-sm text-right max-w-48">{orderData.data.toAddress}</span>
+                          <p className="text-sm bg-muted p-2 rounded">{orderData.data.toAddress}</p>
+                        </div>
+                      )}
+                      {orderData.data.toContact && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">收货联系人:</span>
+                          <span className="text-sm">{orderData.data.toContact}</span>
+                        </div>
+                      )}
+                      {orderData.data.toPhone && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">收货电话:</span>
+                          <span className="text-sm font-mono">{orderData.data.toPhone}</span>
+                        </div>
+                      )}
+                      {orderData.data.carrierName && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">承运商:</span>
+                          <span className="text-sm font-medium">{orderData.data.carrierName}</span>
+                        </div>
+                      )}
+                      {orderData.data.carrierCode && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">承运商编码:</span>
+                          <span className="text-sm">{orderData.data.carrierCode}</span>
+                        </div>
+                      )}
+                      {orderData.data.transportMode && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">运输方式:</span>
+                          <Badge variant="outline">{orderData.data.transportMode}</Badge>
+                        </div>
+                      )}
+                      {orderData.data.vehicleNo && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">车牌号:</span>
+                          <span className="text-sm font-mono bg-muted px-2 py-1 rounded">{orderData.data.vehicleNo}</span>
+                        </div>
+                      )}
+                      {orderData.data.driverName && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">司机姓名:</span>
+                          <span className="text-sm">{orderData.data.driverName}</span>
+                        </div>
+                      )}
+                      {orderData.data.driverPhone && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">司机电话:</span>
+                          <span className="text-sm font-mono">{orderData.data.driverPhone}</span>
+                        </div>
+                      )}
+                      {orderData.data.estimatedDeliveryTime && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">预计送达:</span>
+                          <span className="text-sm">{new Date(orderData.data.estimatedDeliveryTime).toLocaleString('zh-CN')}</span>
+                        </div>
+                      )}
+                      {orderData.data.actualDeliveryTime && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">实际送达:</span>
+                          <span className="text-sm">{new Date(orderData.data.actualDeliveryTime).toLocaleString('zh-CN')}</span>
                         </div>
                       )}
                       {orderData.data.totalWeight && (
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">总重量:</span>
-                          <span className="text-sm">{orderData.data.totalWeight} kg</span>
+                          <span className="text-sm font-medium">{orderData.data.totalWeight} kg</span>
                         </div>
                       )}
                       {orderData.data.totalVolume && (
                         <div className="flex justify-between">
                           <span className="text-sm text-muted-foreground">总体积:</span>
-                          <span className="text-sm">{orderData.data.totalVolume} m³</span>
+                          <span className="text-sm font-medium">{orderData.data.totalVolume} m³</span>
+                        </div>
+                      )}
+                      {orderData.data.packageCount && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">包装数量:</span>
+                          <span className="text-sm">{orderData.data.packageCount} 件</span>
+                        </div>
+                      )}
+                      {orderData.data.totalAmount && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">运费金额:</span>
+                          <span className="text-sm font-medium text-green-600">¥{orderData.data.totalAmount}</span>
+                        </div>
+                      )}
+                      {orderData.data.distance && (
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">运输距离:</span>
+                          <span className="text-sm">{orderData.data.distance} km</span>
                         </div>
                       )}
                     </div>
