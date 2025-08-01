@@ -88,11 +88,23 @@ const DynamicFormRenderer = ({
     console.log('Fields:', fields);
     console.log('onSubmit callback exists:', !!onSubmit);
     
-    // 处理加密字段
+    // 处理数据格式
     const processedData = { ...data };
+    
+    // 处理日期字段格式
     fields.forEach(field => {
+      if (field.field_type === 'date' && processedData[field.field_name]) {
+        const dateValue = processedData[field.field_name];
+        // 如果是复杂的日期对象，提取ISO字符串
+        if (dateValue && typeof dateValue === 'object' && dateValue.value && dateValue.value.iso) {
+          processedData[field.field_name] = dateValue.value.iso;
+        } else if (dateValue instanceof Date) {
+          processedData[field.field_name] = dateValue.toISOString();
+        }
+      }
+      
+      // 处理加密字段
       if (field.is_encrypted && processedData[field.field_name]) {
-        // 这里可以实现实际的加密逻辑
         processedData[field.field_name] = btoa(processedData[field.field_name]); // 简单的base64编码示例
       }
     });
