@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import RealTimeMap from "./pages/RealTimeMap";
 import AnomalyDetection from "./pages/AnomalyDetection";
 import CostPrediction from "./pages/CostPrediction";
+import RouteOptimization from "./pages/RouteOptimization";
 import FormDesigner from "./pages/FormDesigner";
 import ApiManagement from "./pages/ApiManagement";
 import Auth from "./pages/Auth";
@@ -112,6 +113,13 @@ const App = () => (
           <ProtectedRoute>
             <AppLayout>
               <CostPrediction />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/route-optimization" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <RouteOptimization />
             </AppLayout>
           </ProtectedRoute>
         } />

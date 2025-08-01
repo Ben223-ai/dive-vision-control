@@ -13,7 +13,8 @@ import {
   MessageSquare,
   Settings,
   Menu,
-  X
+  X,
+  Route
  } from "lucide-react";
 
 interface SidebarProps {
@@ -29,9 +30,9 @@ export default function Sidebar({ className }: SidebarProps) {
     { name: "实时地图", href: "/map", icon: MapPin, current: location.pathname === "/map" },
     { name: "订单追踪", href: "/orders", icon: Package, current: location.pathname === "/orders" },
     { name: "智能预警", href: "/alerts", icon: AlertTriangle, current: location.pathname === "/alerts" },
-    { name: "数据分析", href: "/analytics", icon: BarChart3, current: location.pathname === "/analytics" },
     { name: "异常检测", href: "/anomaly-detection", icon: Brain, current: location.pathname === "/anomaly-detection" },
     { name: "成本预测", href: "/cost-prediction", icon: Calculator, current: location.pathname === "/cost-prediction" },
+    { name: "路线优化", href: "/route-optimization", icon: Route, current: location.pathname === "/route-optimization" },
     { name: "协同通信", href: "/communication", icon: MessageSquare, current: location.pathname === "/communication" },
     { name: "系统设置", href: "/settings", icon: Settings, current: location.pathname === "/settings" },
   ];
