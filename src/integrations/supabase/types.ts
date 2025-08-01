@@ -188,6 +188,90 @@ export type Database = {
           },
         ]
       }
+      form_fields: {
+        Row: {
+          created_at: string
+          field_label: string
+          field_name: string
+          field_options: Json | null
+          field_type: string
+          grid_column_span: number | null
+          id: string
+          is_encrypted: boolean | null
+          is_required: boolean | null
+          is_visible: boolean | null
+          sort_order: number | null
+          template_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          field_label: string
+          field_name: string
+          field_options?: Json | null
+          field_type?: string
+          grid_column_span?: number | null
+          id?: string
+          is_encrypted?: boolean | null
+          is_required?: boolean | null
+          is_visible?: boolean | null
+          sort_order?: number | null
+          template_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          field_label?: string
+          field_name?: string
+          field_options?: Json | null
+          field_type?: string
+          grid_column_span?: number | null
+          id?: string
+          is_encrypted?: boolean | null
+          is_required?: boolean | null
+          is_visible?: boolean | null
+          sort_order?: number | null
+          template_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      form_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          template_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          template_type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          template_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       issues: {
         Row: {
           assigned_to: string | null
@@ -617,6 +701,54 @@ export type Database = {
           id?: string
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      template_role_bindings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          template_id?: string
+        }
+        Relationships: []
+      }
+      template_user_bindings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          template_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          template_id?: string
+          user_id?: string
         }
         Relationships: []
       }

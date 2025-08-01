@@ -13,6 +13,7 @@ import Analytics from "./pages/Analytics";
 import Communication from "./pages/Communication";
 import Settings from "./pages/Settings";
 import RealTimeMap from "./pages/RealTimeMap";
+import FormDesigner from "./pages/FormDesigner";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
@@ -105,6 +106,11 @@ const App = () => (
             <AppLayout>
               <Settings />
             </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/form-designer" element={
+          <ProtectedRoute>
+            <FormDesigner />
           </ProtectedRoute>
         } />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
