@@ -236,11 +236,19 @@ export default function GeocodingPanel({ apiKey, onLocationSelect }: GeocodingPa
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <div>省份: {reverseResult.addressComponent.province}</div>
-                  <div>城市: {reverseResult.addressComponent.city}</div>
-                  <div>区县: {reverseResult.addressComponent.district}</div>
-                  <div>街道: {reverseResult.addressComponent.street}</div>
-                  <div>门牌: {reverseResult.addressComponent.streetNumber}</div>
+                  <div>省份: {reverseResult.addressComponent.province || '未知'}</div>
+                  <div>城市: {reverseResult.addressComponent.city || '未知'}</div>
+                  <div>区县: {reverseResult.addressComponent.district || '未知'}</div>
+                  <div>街道: {
+                    typeof reverseResult.addressComponent.street === 'string' 
+                      ? reverseResult.addressComponent.street 
+                      : (reverseResult.addressComponent.street as any)?.name || '未知'
+                  }</div>
+                  <div>门牌: {
+                    typeof reverseResult.addressComponent.streetNumber === 'string' 
+                      ? reverseResult.addressComponent.streetNumber 
+                      : (reverseResult.addressComponent.streetNumber as any)?.number || '未知'
+                  }</div>
                 </div>
               </div>
               <Button

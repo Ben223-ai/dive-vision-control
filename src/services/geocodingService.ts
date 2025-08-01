@@ -14,8 +14,8 @@ interface ReverseGeocodeResult {
     province: string;
     city: string;
     district: string;
-    street: string;
-    streetNumber: string;
+    street: string | { name?: string };
+    streetNumber: string | { number?: string };
   };
 }
 
