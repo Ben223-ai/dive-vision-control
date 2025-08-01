@@ -167,80 +167,136 @@ export const IntegrationSettings = () => {
           amapService: { ...prev.amapService, status: "connecting" }
         }));
 
+        // 高德地图API不支持浏览器直接调用(CORS限制)，改为JSONP方式测试
         try {
-          // 测试高德地图API
-          const testUrl = `https://restapi.amap.com/v3/config/district?key=${integrations.amapService.apiKey}&keywords=中国&subdistrict=0`;
-          console.log('Testing Amap API with URL:', testUrl);
-          
-          const response = await fetch(testUrl);
-          console.log('Response status:', response.status);
-          console.log('Response headers:', response.headers);
-          
-          // 生成详细的curl信息
-          const curlCommand = `curl -X GET "${testUrl}" \\
-  -H "Accept: application/json" \\
-  -H "Content-Type: application/json" \\
-  -H "User-Agent: Mozilla/5.0" \\
-  -v`;
-          
-          console.log('等效的curl命令:', curlCommand);
-          
-          let responseData;
-          try {
-            responseData = await response.json();
-            console.log('Response data:', responseData);
-          } catch (jsonError) {
-            console.log('Response text:', await response.text());
-          }
-          
-          const isConnected = response.ok && response.status === 200;
+          console.log('开始测试高德地图API...');
           
           setIntegrations(prev => ({
             ...prev,
-            amapService: { ...prev.amapService, status: isConnected ? "connected" : "error" }
+            amapService: { ...prev.amapService, status: "connecting" }
           }));
 
-          // 显示详细错误信息
-          if (!isConnected) {
-            const errorInfo = `
-状态码: ${response.status}
-错误信息: ${responseData?.info || '未知错误'}
-响应代码: ${responseData?.infocode || 'N/A'}
-
-调试Curl命令:
-${curlCommand}
-
-常见问题:
-1. API密钥无效或已过期
-2. API服务未开通或余额不足  
-3. 域名未添加到白名单
-4. 请求频率超限
-            `.trim();
+          // 使用JSONP方式测试API
+          const testApiKey = integrations.amapService.apiKey;
+          const testUrl = `https://restapi.amap.com/v3/geocode/geo?address=北京市朝阳区阜通东大街6号&output=JSON&key=${testApiKey}`;
+          
+          // 生成详细的curl测试命令
+          const curlCommands = {
+            geocoding: `curl -X GET "https://restapi.amap.com/v3/geocode/geo" \\
+  -G \\
+  -d "address=北京市朝阳区阜通东大街6号" \\
+  -d "output=JSON" \\
+  -d "key=${testApiKey}" \\
+  -H "User-Agent: YourAppName/1.0" \\
+  -v`,
             
-            navigator.clipboard.writeText(curlCommand).catch(() => {});
+            weather: `curl -X GET "https://restapi.amap.com/v3/weather/weatherInfo" \\
+  -G \\
+  -d "city=110000" \\
+  -d "key=${testApiKey}" \\
+  -H "User-Agent: YourAppName/1.0" \\
+  -v`,
             
-            toast({
-              title: "API测试失败",
-              description: errorInfo,
-              variant: "destructive",
+            district: `curl -X GET "https://restapi.amap.com/v3/config/district" \\
+  -G \\
+  -d "keywords=中国" \\
+  -d "subdistrict=0" \\
+  -d "key=${testApiKey}" \\
+  -H "User-Agent: YourAppName/1.0" \\
+  -v`
+          };
+
+          console.log('高德地图API测试命令:');
+          console.log('地理编码测试:', curlCommands.geocoding);
+          console.log('天气API测试:', curlCommands.weather);
+          console.log('行政区域测试:', curlCommands.district);
+
+          // 创建JSONP测试
+          const jsonpTest = () => {
+            return new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              const callbackName = 'amapCallback' + Date.now();
+              
+              // 设置全局回调函数
+              (window as any)[callbackName] = (data: any) => {
+                document.head.removeChild(script);
+                delete (window as any)[callbackName];
+                resolve(data);
+              };
+              
+              // 设置超时
+              const timeout = setTimeout(() => {
+                document.head.removeChild(script);
+                delete (window as any)[callbackName];
+                reject(new Error('JSONP请求超时'));
+              }, 5000);
+              
+              script.onerror = () => {
+                clearTimeout(timeout);
+                document.head.removeChild(script);
+                delete (window as any)[callbackName];
+                reject(new Error('JSONP请求失败'));
+              };
+              
+              // 使用支持JSONP的API端点
+              script.src = `https://restapi.amap.com/v3/config/district?keywords=中国&subdistrict=0&key=${testApiKey}&callback=${callbackName}`;
+              document.head.appendChild(script);
             });
-          } else {
+          };
+
+          try {
+            const result = await jsonpTest();
+            console.log('JSONP测试结果:', result);
+            
+            const isValid = result && (result as any).status === '1';
+            
+            setIntegrations(prev => ({
+              ...prev,
+              amapService: { ...prev.amapService, status: isValid ? "connected" : "error" }
+            }));
+
+            if (isValid) {
+              toast({
+                title: "API测试成功",
+                description: "高德地图API密钥有效，服务正常",
+              });
+            } else {
+              throw new Error((result as any)?.info || 'API返回错误');
+            }
+          } catch (jsonpError) {
+            console.error('JSONP测试失败:', jsonpError);
+            
+            // JSONP失败时，提供curl命令供用户手动测试
+            const allCurlCommands = Object.values(curlCommands).join('\n\n');
+            navigator.clipboard.writeText(allCurlCommands).catch(() => {});
+            
+            setIntegrations(prev => ({
+              ...prev,
+              amapService: { ...prev.amapService, status: "error" }
+            }));
+            
             toast({
-              title: "连接成功",
-              description: "高德地图API连接正常",
+              title: "无法直接测试API",
+              description: `由于CORS限制，无法在浏览器中直接测试高德API。
+
+已复制curl测试命令到剪贴板，请在终端中执行测试：
+
+测试方法：
+1. 打开终端/命令行
+2. 粘贴并执行curl命令
+3. 检查返回结果中status字段是否为"1"
+
+API使用说明：
+• 地理编码：地址转换为坐标
+• 天气服务：获取实时天气数据  
+• 行政区域：获取区域边界信息
+
+如果curl测试成功，说明API密钥有效，可以在后端正常使用。`,
+              variant: "destructive",
             });
           }
         } catch (error) {
-          console.error('Fetch error:', error);
-          
-          const curlCommand = `curl -X GET "https://restapi.amap.com/v3/config/district?key=${integrations.amapService.apiKey}&keywords=中国&subdistrict=0" \\
-  -H "Accept: application/json" \\
-  -H "Content-Type: application/json" \\
-  -H "User-Agent: Mozilla/5.0" \\
-  -v`;
-          
-          console.log('调试curl命令:', curlCommand);
-          navigator.clipboard.writeText(curlCommand).catch(() => {});
+          console.error('API测试错误:', error);
           
           setIntegrations(prev => ({
             ...prev,
@@ -248,15 +304,8 @@ ${curlCommand}
           }));
           
           toast({
-            title: "网络连接失败",
-            description: `错误: ${error instanceof Error ? error.message : '未知网络错误'}
-            
-调试curl命令已复制到剪贴板
-
-可能原因:
-1. CORS跨域问题
-2. 网络连接异常
-3. API服务器不可达`,
+            title: "测试失败",
+            description: "API密钥测试过程中发生错误，请检查密钥格式",
             variant: "destructive",
           });
         }
