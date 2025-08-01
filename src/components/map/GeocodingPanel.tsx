@@ -6,7 +6,27 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Search, Navigation2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import GeocodingService, { GeocodeResult, ReverseGeocodeResult } from "@/services/geocodingService";
+import { supabase } from "@/integrations/supabase/client";
+
+interface GeocodeResult {
+  formatted_address: string;
+  location: {
+    lng: number;
+    lat: number;
+  };
+  level: string;
+}
+
+interface ReverseGeocodeResult {
+  formatted_address: string;
+  addressComponent: {
+    province: string;
+    city: string;
+    district: string;
+    street: string | { name?: string };
+    streetNumber: string | { number?: string };
+  };
+}
 
 interface GeocodingPanelProps {
   apiKey: string;
@@ -21,7 +41,7 @@ export default function GeocodingPanel({ apiKey, onLocationSelect }: GeocodingPa
   const [reverseResult, setReverseResult] = useState<ReverseGeocodeResult | null>(null);
   const { toast } = useToast();
 
-  const geocodingService = new GeocodingService(apiKey);
+  // 使用Edge Function调用高德API
 
   const handleGeocode = async () => {
     if (!address.trim()) {
@@ -35,24 +55,36 @@ export default function GeocodingPanel({ apiKey, onLocationSelect }: GeocodingPa
 
     setLoading(true);
     try {
-      const result = await geocodingService.geocode(address);
-      if (result) {
-        setGeocodeResult(result);
+      const { data, error } = await supabase.functions.invoke('amap-geocoding', {
+        body: {
+          type: 'geocode',
+          address: address.trim(),
+          apiKey
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.success && data?.data) {
+        setGeocodeResult(data.data);
         toast({
           title: "地理编码成功",
-          description: `找到位置: ${result.formatted_address}`
+          description: `找到位置: ${data.data.formatted_address}`
         });
       } else {
         toast({
           title: "地理编码失败",
-          description: "未找到相关地址信息",
+          description: data?.error || "未找到相关地址信息",
           variant: "destructive"
         });
       }
     } catch (error) {
+      console.error('Geocoding error:', error);
       toast({
         title: "查询失败",
-        description: "地理编码服务出现错误",
+        description: error instanceof Error ? error.message : "地理编码服务出现错误",
         variant: "destructive"
       });
     } finally {
@@ -82,24 +114,36 @@ export default function GeocodingPanel({ apiKey, onLocationSelect }: GeocodingPa
 
     setLoading(true);
     try {
-      const result = await geocodingService.reverseGeocode(lng, lat);
-      if (result) {
-        setReverseResult(result);
+      const { data, error } = await supabase.functions.invoke('amap-geocoding', {
+        body: {
+          type: 'reverse',
+          coordinates: { lng, lat },
+          apiKey
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.success && data?.data) {
+        setReverseResult(data.data);
         toast({
           title: "逆地理编码成功",
-          description: `地址: ${result.formatted_address}`
+          description: `地址: ${data.data.formatted_address}`
         });
       } else {
         toast({
           title: "逆地理编码失败",
-          description: "未找到相关地址信息",
+          description: data?.error || "未找到相关地址信息",
           variant: "destructive"
         });
       }
     } catch (error) {
+      console.error('Reverse geocoding error:', error);
       toast({
         title: "查询失败",
-        description: "逆地理编码服务出现错误",
+        description: error instanceof Error ? error.message : "逆地理编码服务出现错误",
         variant: "destructive"
       });
     } finally {
