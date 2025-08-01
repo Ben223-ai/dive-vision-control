@@ -25,10 +25,8 @@ export const IntegrationSettings = () => {
     },
     tmsService: {
       enabled: false,
-      apiKey: "",
+      token: "",
       baseUrl: "",
-      username: "",
-      password: "",
       status: "disconnected"
     },
     webhook: {
@@ -217,16 +215,16 @@ export const IntegrationSettings = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tms-api-key">API密钥</Label>
+                  <Label htmlFor="tms-token">Token</Label>
                   <div className="relative">
                     <Input
-                      id="tms-api-key"
+                      id="tms-token"
                       type={showApiKeys.tms ? "text" : "password"}
-                      placeholder="请输入TMS API密钥"
-                      value={integrations.tmsService.apiKey}
+                      placeholder="请输入TMS Token"
+                      value={integrations.tmsService.token}
                       onChange={(e) => setIntegrations(prev => ({
                         ...prev,
-                        tmsService: { ...prev.tmsService, apiKey: e.target.value }
+                        tmsService: { ...prev.tmsService, token: e.target.value }
                       }))}
                     />
                     <Button
@@ -243,32 +241,6 @@ export const IntegrationSettings = () => {
                       )}
                     </Button>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tms-username">用户名</Label>
-                  <Input
-                    id="tms-username"
-                    type="text"
-                    placeholder="TMS系统用户名"
-                    value={integrations.tmsService.username}
-                    onChange={(e) => setIntegrations(prev => ({
-                      ...prev,
-                      tmsService: { ...prev.tmsService, username: e.target.value }
-                    }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tms-password">密码</Label>
-                  <Input
-                    id="tms-password"
-                    type="password"
-                    placeholder="TMS系统密码"
-                    value={integrations.tmsService.password}
-                    onChange={(e) => setIntegrations(prev => ({
-                      ...prev,
-                      tmsService: { ...prev.tmsService, password: e.target.value }
-                    }))}
-                  />
                 </div>
               </div>
               
