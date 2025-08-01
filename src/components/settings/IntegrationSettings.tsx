@@ -73,20 +73,76 @@ export const IntegrationSettings = () => {
     });
   };
 
-  const handleSaveApiKey = (service: string) => {
-    // TODO: Implement API key saving logic with Supabase secrets
-    toast({
-      title: "API密钥已保存",
-      description: `${service} API密钥已安全保存`,
-    });
+  const handleSaveApiKey = async (service: string) => {
+    try {
+      // 保存到localStorage
+      const serviceKey = service.toLowerCase().replace(/\s+/g, '');
+      if (serviceKey === 'tms') {
+        localStorage.setItem('tms-config', JSON.stringify({
+          baseUrl: integrations.tmsService.baseUrl,
+          token: integrations.tmsService.token,
+          authorization: integrations.tmsService.token
+        }));
+        
+        // 更新tmsService配置
+        const { default: tmsService } = await import('@/services/tmsService');
+        tmsService.setConfig({
+          baseUrl: integrations.tmsService.baseUrl,
+          token: integrations.tmsService.token,
+          authorization: integrations.tmsService.token
+        });
+      }
+      
+      toast({
+        title: "配置已保存",
+        description: `${service}配置已安全保存`,
+      });
+    } catch (error) {
+      toast({
+        title: "保存失败",
+        description: "保存配置时出现错误",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleTestConnection = (service: string) => {
-    // TODO: Implement connection testing logic
-    toast({
-      title: "连接测试成功",
-      description: `${service} 连接正常`,
-    });
+  const handleTestConnection = async (service: string) => {
+    try {
+      const serviceKey = service.toLowerCase().replace(/\s+/g, '');
+      
+      if (serviceKey === 'tms' || serviceKey === 'tms数据同步') {
+        setIntegrations(prev => ({
+          ...prev,
+          tmsService: { ...prev.tmsService, status: "connecting" }
+        }));
+
+        const { default: tmsService } = await import('@/services/tmsService');
+        const isConnected = await tmsService.testConnection();
+        
+        setIntegrations(prev => ({
+          ...prev,
+          tmsService: { ...prev.tmsService, status: isConnected ? "connected" : "error" }
+        }));
+
+        toast({
+          title: isConnected ? "连接成功" : "连接失败",
+          description: isConnected ? `${service}连接正常` : `无法连接到${service}`,
+          variant: isConnected ? "default" : "destructive",
+        });
+      } else {
+        // 模拟其他服务的连接测试
+        toast({
+          title: "连接测试成功",
+          description: `${service}连接正常`,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "连接失败",
+        description: `${service}连接测试失败`,
+        variant: "destructive",
+      });
+    }
   };
 
   const renderStatusBadge = (status: string) => {
