@@ -8,7 +8,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit, Settings, Eye, EyeOff, Lock, Unlock, GripVertical } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Edit, Settings, Eye, EyeOff, Lock, Unlock, GripVertical, Users, UserCheck, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -37,6 +38,22 @@ interface FormTemplate {
   is_active: boolean;
 }
 
+interface RoleBinding {
+  id: string;
+  template_id: string;
+  role: string;
+}
+
+interface UserBinding {
+  id: string;
+  template_id: string;
+  user_id: string;
+  profile?: {
+    display_name: string;
+    username: string;
+  };
+}
+
 const FormTemplateManager = () => {
   const [templates, setTemplates] = useState<FormTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<FormTemplate | null>(null);
@@ -44,7 +61,11 @@ const FormTemplateManager = () => {
   const [editingField, setEditingField] = useState<FormField | null>(null);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [isBindingDialogOpen, setIsBindingDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<FormTemplate | null>(null);
+  const [roleBindings, setRoleBindings] = useState<RoleBinding[]>([]);
+  const [userBindings, setUserBindings] = useState<UserBinding[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   const sensors = useSensors(
@@ -67,11 +88,13 @@ const FormTemplateManager = () => {
 
   useEffect(() => {
     loadTemplates();
+    loadAvailableUsers();
   }, []);
 
   useEffect(() => {
     if (selectedTemplate) {
       loadFields(selectedTemplate.id);
+      loadBindings(selectedTemplate.id);
     }
   }, [selectedTemplate]);
 
@@ -109,6 +132,61 @@ const FormTemplateManager = () => {
     } catch (error) {
       console.error('加载字段失败:', error);
       toast.error('加载字段失败');
+    }
+  };
+
+  const loadAvailableUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, display_name, username');
+
+      if (error) throw error;
+      setAvailableUsers(data || []);
+    } catch (error) {
+      console.error('加载用户失败:', error);
+    }
+  };
+
+  const loadBindings = async (templateId: string) => {
+    try {
+      // 加载角色绑定
+      const { data: roleData, error: roleError } = await supabase
+        .from('template_role_bindings')
+        .select('*')
+        .eq('template_id', templateId);
+
+      if (roleError) throw roleError;
+      setRoleBindings(roleData || []);
+
+      // 加载用户绑定，先简化查询
+      const { data: userData, error: userError } = await supabase
+        .from('template_user_bindings')
+        .select('*')
+        .eq('template_id', templateId);
+
+      if (userError) throw userError;
+      
+      // 然后获取用户信息
+      const userBindingsWithProfiles = await Promise.all(
+        (userData || []).map(async (binding) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('display_name, username')
+            .eq('id', binding.user_id)
+            .single();
+          
+          return {
+            ...binding,
+            profile: profile || { display_name: '', username: '' }
+          };
+        })
+      );
+      
+      setUserBindings(userBindingsWithProfiles);
+    } catch (error) {
+      console.error('加载绑定失败:', error);
+      toast.error('加载绑定失败');
     }
   };
 
@@ -278,6 +356,78 @@ const FormTemplateManager = () => {
     }
   };
 
+  const addRoleBinding = async (role: string) => {
+    if (!selectedTemplate) return;
+
+    try {
+      const { error } = await supabase
+        .from('template_role_bindings')
+        .insert({
+          template_id: selectedTemplate.id,
+          role: role as 'admin' | 'manager' | 'operator' | 'viewer'
+        });
+
+      if (error) throw error;
+      toast.success('角色绑定添加成功');
+      loadBindings(selectedTemplate.id);
+    } catch (error) {
+      console.error('添加角色绑定失败:', error);
+      toast.error('添加角色绑定失败');
+    }
+  };
+
+  const addUserBinding = async (userId: string) => {
+    if (!selectedTemplate) return;
+
+    try {
+      const { error } = await supabase
+        .from('template_user_bindings')
+        .insert([{
+          template_id: selectedTemplate.id,
+          user_id: userId
+        }]);
+
+      if (error) throw error;
+      toast.success('用户绑定添加成功');
+      loadBindings(selectedTemplate.id);
+    } catch (error) {
+      console.error('添加用户绑定失败:', error);
+      toast.error('添加用户绑定失败');
+    }
+  };
+
+  const removeRoleBinding = async (bindingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('template_role_bindings')
+        .delete()
+        .eq('id', bindingId);
+
+      if (error) throw error;
+      toast.success('角色绑定已删除');
+      loadBindings(selectedTemplate!.id);
+    } catch (error) {
+      console.error('删除角色绑定失败:', error);
+      toast.error('删除角色绑定失败');
+    }
+  };
+
+  const removeUserBinding = async (bindingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('template_user_bindings')
+        .delete()
+        .eq('id', bindingId);
+
+      if (error) throw error;
+      toast.success('用户绑定已删除');
+      loadBindings(selectedTemplate!.id);
+    } catch (error) {
+      console.error('删除用户绑定失败:', error);
+      toast.error('删除用户绑定失败');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* 模板选择 */}
@@ -327,94 +477,177 @@ const FormTemplateManager = () => {
         </CardContent>
       </Card>
 
-      {/* 字段配置 */}
+      {/* 字段和权限管理 */}
       {selectedTemplate && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>字段配置 - {selectedTemplate.name}</CardTitle>
-              <Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={() => setEditingField(null)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    添加字段
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingField ? '编辑字段' : '添加字段'}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <FieldEditor
-                    field={editingField}
-                    fieldTypes={fieldTypes}
-                    onSave={saveField}
-                    loading={loading}
-                  />
-                </DialogContent>
-              </Dialog>
+              <CardTitle>管理 - {selectedTemplate.name}</CardTitle>
+              <div className="flex gap-2">
+                <Dialog open={isBindingDialogOpen} onOpenChange={setIsBindingDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Users className="h-4 w-4 mr-2" />
+                      权限绑定
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>模板权限绑定 - {selectedTemplate.name}</DialogTitle>
+                    </DialogHeader>
+                    <PermissionBindingManager
+                      template={selectedTemplate}
+                      roleBindings={roleBindings}
+                      userBindings={userBindings}
+                      availableUsers={availableUsers}
+                      onAddRoleBinding={addRoleBinding}
+                      onAddUserBinding={addUserBinding}
+                      onRemoveRoleBinding={removeRoleBinding}
+                      onRemoveUserBinding={removeUserBinding}
+                    />
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={isFieldDialogOpen} onOpenChange={setIsFieldDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={() => setEditingField(null)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      添加字段
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingField ? '编辑字段' : '添加字段'}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <FieldEditor
+                      field={editingField}
+                      fieldTypes={fieldTypes}
+                      onSave={saveField}
+                      loading={loading}
+                    />
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <DndContext 
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2">
-                  {fields.map(field => (
-                    <SortableItem key={field.id} id={field.id}>
-                      <div className="flex items-center gap-4 p-4 border rounded-lg bg-card">
-                        <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
-                        
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{field.field_label}</span>
-                            <Badge variant="outline">{fieldTypes.find(t => t.value === field.field_type)?.label}</Badge>
-                            {field.is_required && <Badge variant="secondary">必填</Badge>}
-                            {field.is_encrypted && <Lock className="h-3 w-3 text-warning" />}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            字段名: {field.field_name}
-                          </div>
-                        </div>
+            <Tabs defaultValue="fields" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="fields">字段配置</TabsTrigger>
+                <TabsTrigger value="permissions">权限设置</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="fields" className="mt-4">
+                <DndContext 
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-2">
+                      {fields.map(field => (
+                        <SortableItem key={field.id} id={field.id}>
+                          <div className="flex items-center gap-4 p-4 border rounded-lg bg-card">
+                            <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
+                            
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium">{field.field_label}</span>
+                                <Badge variant="outline">{fieldTypes.find(t => t.value === field.field_type)?.label}</Badge>
+                                {field.is_required && <Badge variant="secondary">必填</Badge>}
+                                {field.is_encrypted && <Lock className="h-3 w-3 text-warning" />}
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                字段名: {field.field_name}
+                              </div>
+                            </div>
 
-                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleFieldVisibility(field)}
+                              >
+                                {field.is_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                              </Button>
+                              
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => toggleFieldEncryption(field)}
+                              >
+                                {field.is_encrypted ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+                              </Button>
+                              
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingField(field);
+                                  setIsFieldDialogOpen(true);
+                                }}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </SortableItem>
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              </TabsContent>
+
+              <TabsContent value="permissions" className="mt-4">
+                <div className="space-y-6">
+                  {/* 角色绑定 */}
+                  <div>
+                    <h4 className="font-medium mb-3">角色绑定</h4>
+                    <div className="space-y-2">
+                      {roleBindings.map(binding => (
+                        <div key={binding.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <UserCheck className="h-4 w-4" />
+                            <span className="capitalize">{binding.role}</span>
+                          </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => toggleFieldVisibility(field)}
+                            onClick={() => removeRoleBinding(binding.id)}
                           >
-                            {field.is_visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                          </Button>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleFieldEncryption(field)}
-                          >
-                            {field.is_encrypted ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-                          </Button>
-                          
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setEditingField(field);
-                              setIsFieldDialogOpen(true);
-                            }}
-                          >
-                            <Edit className="h-4 w-4" />
+                            <X className="h-4 w-4" />
                           </Button>
                         </div>
-                      </div>
-                    </SortableItem>
-                  ))}
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 用户绑定 */}
+                  <div>
+                    <h4 className="font-medium mb-3">用户绑定</h4>
+                    <div className="space-y-2">
+                      {userBindings.map(binding => (
+                        <div key={binding.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4" />
+                            <span>{binding.profile?.display_name || binding.profile?.username || '未知用户'}</span>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeUserBinding(binding.id)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </SortableContext>
-            </DndContext>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       )}
@@ -625,6 +858,166 @@ const TemplateEditor = ({ template, onSave, loading }: {
         </Button>
       </div>
     </form>
+  );
+};
+
+// 权限绑定管理组件
+const PermissionBindingManager = ({ 
+  template, 
+  roleBindings, 
+  userBindings, 
+  availableUsers,
+  onAddRoleBinding,
+  onAddUserBinding,
+  onRemoveRoleBinding,
+  onRemoveUserBinding
+}: {
+  template: FormTemplate;
+  roleBindings: RoleBinding[];
+  userBindings: UserBinding[];
+  availableUsers: any[];
+  onAddRoleBinding: (role: string) => void;
+  onAddUserBinding: (userId: string) => void;
+  onRemoveRoleBinding: (bindingId: string) => void;
+  onRemoveUserBinding: (bindingId: string) => void;
+}) => {
+  const [selectedRole, setSelectedRole] = useState('');
+  const [selectedUser, setSelectedUser] = useState('');
+
+  const availableRoles = [
+    { value: 'admin', label: '管理员' },
+    { value: 'manager', label: '经理' },
+    { value: 'operator', label: '操作员' },
+    { value: 'viewer', label: '查看者' },
+  ];
+
+  const handleAddRoleBinding = () => {
+    if (selectedRole) {
+      onAddRoleBinding(selectedRole);
+      setSelectedRole('');
+    }
+  };
+
+  const handleAddUserBinding = () => {
+    if (selectedUser) {
+      onAddUserBinding(selectedUser);
+      setSelectedUser('');
+    }
+  };
+
+  const boundRoles = roleBindings.map(binding => binding.role);
+  const boundUserIds = userBindings.map(binding => binding.user_id);
+
+  return (
+    <div className="space-y-6">
+      {/* 添加角色绑定 */}
+      <div>
+        <h4 className="font-medium mb-3">添加角色绑定</h4>
+        <div className="flex gap-2">
+          <Select value={selectedRole} onValueChange={setSelectedRole}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="选择角色" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableRoles
+                .filter(role => !boundRoles.includes(role.value))
+                .map(role => (
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAddRoleBinding} disabled={!selectedRole}>
+            添加角色
+          </Button>
+        </div>
+      </div>
+
+      {/* 添加用户绑定 */}
+      <div>
+        <h4 className="font-medium mb-3">添加用户绑定</h4>
+        <div className="flex gap-2">
+          <Select value={selectedUser} onValueChange={setSelectedUser}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="选择用户" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableUsers
+                .filter(user => !boundUserIds.includes(user.id))
+                .map(user => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.display_name || user.username || '未知用户'}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+          <Button onClick={handleAddUserBinding} disabled={!selectedUser}>
+            添加用户
+          </Button>
+        </div>
+      </div>
+
+      {/* 当前绑定列表 */}
+      <div>
+        <h4 className="font-medium mb-3">当前绑定</h4>
+        <div className="space-y-4">
+          {/* 角色绑定列表 */}
+          {roleBindings.length > 0 && (
+            <div>
+              <h5 className="text-sm font-medium text-muted-foreground mb-2">角色绑定</h5>
+              <div className="space-y-2">
+                {roleBindings.map(binding => (
+                  <div key={binding.id} className="flex items-center justify-between p-2 border rounded">
+                    <div className="flex items-center gap-2">
+                      <UserCheck className="h-4 w-4" />
+                      <span className="capitalize">
+                        {availableRoles.find(r => r.value === binding.role)?.label || binding.role}
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onRemoveRoleBinding(binding.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 用户绑定列表 */}
+          {userBindings.length > 0 && (
+            <div>
+              <h5 className="text-sm font-medium text-muted-foreground mb-2">用户绑定</h5>
+              <div className="space-y-2">
+                {userBindings.map(binding => (
+                  <div key={binding.id} className="flex items-center justify-between p-2 border rounded">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>{binding.profile?.display_name || binding.profile?.username || '未知用户'}</span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onRemoveUserBinding(binding.id)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {roleBindings.length === 0 && userBindings.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">暂无权限绑定</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
 
