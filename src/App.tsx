@@ -13,6 +13,7 @@ import Analytics from "./pages/Analytics";
 import Communication from "./pages/Communication";
 import Settings from "./pages/Settings";
 import RealTimeMap from "./pages/RealTimeMap";
+import AnomalyDetection from "./pages/AnomalyDetection";
 import FormDesigner from "./pages/FormDesigner";
 import ApiManagement from "./pages/ApiManagement";
 import Auth from "./pages/Auth";
@@ -94,7 +95,16 @@ const App = () => (
         } />
         <Route path="/analytics" element={
           <ProtectedRoute>
-            <Analytics />
+            <AppLayout>
+              <Analytics />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/anomaly-detection" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <AnomalyDetection />
+            </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/communication" element={
