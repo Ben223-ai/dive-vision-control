@@ -12,10 +12,15 @@ import { useToast } from "@/hooks/use-toast";
 
 interface PredictionResult {
   orderId: string;
+  orderNumber?: string;
+  origin?: string;
+  destination?: string;
+  status?: string;
   predictedDelivery: string;
   predictedHours: number;
   confidenceScore: number;
   factors: any;
+  createdAt?: string;
 }
 
 interface ModelMetrics {
@@ -92,37 +97,51 @@ export default function DeliveryTimePrediction() {
 
   const fetchRecentPredictions = async () => {
     try {
-      const { data, error } = await supabase
+      // 首先获取预测数据
+      const { data: predictionsData, error: predictionsError } = await supabase
         .from("delivery_predictions")
-        .select(`
-          *,
-          orders (
-            order_number,
-            origin,
-            destination,
-            status
-          )
-        `)
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(20);
 
-      if (error) {
-        console.error("Error fetching predictions:", error);
+      if (predictionsError) {
+        console.error("Error fetching predictions:", predictionsError);
         return;
       }
 
-      const formattedPredictions = (data || []).map(pred => ({
-        orderId: pred.order_id,
-        orderNumber: pred.orders?.order_number,
-        origin: pred.orders?.origin,
-        destination: pred.orders?.destination,
-        status: pred.orders?.status,
-        predictedDelivery: pred.predicted_delivery,
-        predictedHours: 0, // 计算从现在到预测时间的小时数
-        confidenceScore: pred.confidence_score,
-        factors: pred.prediction_factors,
-        createdAt: pred.created_at
-      }));
+      if (!predictionsData || predictionsData.length === 0) {
+        setPredictions([]);
+        return;
+      }
+
+      // 获取相关订单信息
+      const orderIds = predictionsData.map(pred => pred.order_id);
+      const { data: ordersData, error: ordersError } = await supabase
+        .from("orders")
+        .select("id, order_number, origin, destination, status")
+        .in("id", orderIds);
+
+      if (ordersError) {
+        console.error("Error fetching orders:", ordersError);
+        return;
+      }
+
+      // 合并数据
+      const formattedPredictions = predictionsData.map(pred => {
+        const order = ordersData?.find(o => o.id === pred.order_id);
+        return {
+          orderId: pred.order_id,
+          orderNumber: order?.order_number,
+          origin: order?.origin,
+          destination: order?.destination,
+          status: order?.status,
+          predictedDelivery: pred.predicted_delivery,
+          predictedHours: 0, // 计算从现在到预测时间的小时数
+          confidenceScore: pred.confidence_score,
+          factors: pred.prediction_factors,
+          createdAt: pred.created_at
+        };
+      });
 
       setPredictions(formattedPredictions);
     } catch (error) {

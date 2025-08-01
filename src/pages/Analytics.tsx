@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import TransportationKPIDashboard from "@/components/analytics/TransportationKPIDashboard";
 import OperationalCostAnalysis from "@/components/analytics/OperationalCostAnalysis";
 import CarrierPerformance from "@/components/analytics/CarrierPerformance";
+import DeliveryTimePrediction from "@/components/analytics/DeliveryTimePrediction";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function Analytics() {
@@ -24,7 +25,7 @@ export default function Analytics() {
             </div>
 
             <Tabs defaultValue="kpi" className="space-y-4 md:space-y-6">
-              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto space-y-1' : 'grid-cols-3'}`}>
+              <TabsList className={`grid w-full ${isMobile ? 'grid-cols-1 h-auto space-y-1' : 'grid-cols-4'}`}>
                 <TabsTrigger value="kpi" className={isMobile ? "w-full justify-start" : ""}>
                   {isMobile ? "KPI仪表盘" : "运输KPI仪表盘"}
                 </TabsTrigger>
@@ -33,6 +34,9 @@ export default function Analytics() {
                 </TabsTrigger>
                 <TabsTrigger value="carriers" className={isMobile ? "w-full justify-start" : ""}>
                   {isMobile ? "承运商绩效" : "承运商绩效统计"}
+                </TabsTrigger>
+                <TabsTrigger value="prediction" className={isMobile ? "w-full justify-start" : ""}>
+                  {isMobile ? "AI预测" : "LSTM交付时间预测"}
                 </TabsTrigger>
               </TabsList>
 
@@ -46,6 +50,10 @@ export default function Analytics() {
 
               <TabsContent value="carriers" className="space-y-6">
                 <CarrierPerformance />
+              </TabsContent>
+
+              <TabsContent value="prediction" className="space-y-6">
+                <DeliveryTimePrediction />
               </TabsContent>
             </Tabs>
           </div>
