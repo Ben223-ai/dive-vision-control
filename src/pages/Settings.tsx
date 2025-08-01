@@ -6,6 +6,7 @@ import { SystemConfig } from "@/components/settings/SystemConfig";
 import { AccountManagement } from "@/components/settings/AccountManagement";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
+import PermissionManagement from "@/components/settings/PermissionManagement";
 
 const Settings = () => {
   return (
@@ -18,12 +19,13 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="profile">用户资料</TabsTrigger>
           <TabsTrigger value="preferences">应用偏好</TabsTrigger>
           <TabsTrigger value="system">系统配置</TabsTrigger>
           <TabsTrigger value="account">账户管理</TabsTrigger>
           <TabsTrigger value="security">安全设置</TabsTrigger>
+          <TabsTrigger value="permissions">权限管理</TabsTrigger>
           <TabsTrigger value="integrations">集成设置</TabsTrigger>
         </TabsList>
 
@@ -95,6 +97,10 @@ const Settings = () => {
               <SecuritySettings />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="permissions" className="space-y-4">
+          <PermissionManagement />
         </TabsContent>
 
         <TabsContent value="integrations" className="space-y-4">
