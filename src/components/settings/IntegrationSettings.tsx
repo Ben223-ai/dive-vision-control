@@ -7,13 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Link, MapPin, Mail, MessageSquare, Bell } from "lucide-react";
+import { Eye, EyeOff, Link, MapPin, Mail, MessageSquare, Bell, Truck } from "lucide-react";
 
 export const IntegrationSettings = () => {
   const [showApiKeys, setShowApiKeys] = useState({
     google: false,
     webhook: false,
-    email: false
+    email: false,
+    tms: false
   });
 
   const [integrations, setIntegrations] = useState({
@@ -21,6 +22,14 @@ export const IntegrationSettings = () => {
       enabled: true,
       apiKey: "AIzaSyC4R6AN7SmxxAEeOz_P7MjE9t...",
       status: "connected"
+    },
+    tmsService: {
+      enabled: false,
+      apiKey: "",
+      baseUrl: "",
+      username: "",
+      password: "",
+      status: "disconnected"
     },
     webhook: {
       enabled: false,
@@ -159,6 +168,130 @@ export const IntegrationSettings = () => {
                     获取API密钥
                   </a>
                 </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* TMS集成服务 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            TMS集成服务
+          </CardTitle>
+          <CardDescription>连接运输管理系统，实现订单和车辆数据同步</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-medium">TMS系统集成</span>
+                {renderStatusBadge(integrations.tmsService.status)}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                与第三方TMS系统进行数据交互和同步
+              </p>
+            </div>
+            <Switch
+              checked={integrations.tmsService.enabled}
+              onCheckedChange={(checked) => handleToggleIntegration('tmsService', checked)}
+            />
+          </div>
+
+          {integrations.tmsService.enabled && (
+            <div className="space-y-4 p-4 bg-muted rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tms-base-url">TMS服务地址</Label>
+                  <Input
+                    id="tms-base-url"
+                    type="url"
+                    placeholder="https://tms.company.com/api/v1"
+                    value={integrations.tmsService.baseUrl}
+                    onChange={(e) => setIntegrations(prev => ({
+                      ...prev,
+                      tmsService: { ...prev.tmsService, baseUrl: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tms-api-key">API密钥</Label>
+                  <div className="relative">
+                    <Input
+                      id="tms-api-key"
+                      type={showApiKeys.tms ? "text" : "password"}
+                      placeholder="请输入TMS API密钥"
+                      value={integrations.tmsService.apiKey}
+                      onChange={(e) => setIntegrations(prev => ({
+                        ...prev,
+                        tmsService: { ...prev.tmsService, apiKey: e.target.value }
+                      }))}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowApiKeys(prev => ({ ...prev, tms: !prev.tms }))}
+                    >
+                      {showApiKeys.tms ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tms-username">用户名</Label>
+                  <Input
+                    id="tms-username"
+                    type="text"
+                    placeholder="TMS系统用户名"
+                    value={integrations.tmsService.username}
+                    onChange={(e) => setIntegrations(prev => ({
+                      ...prev,
+                      tmsService: { ...prev.tmsService, username: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tms-password">密码</Label>
+                  <Input
+                    id="tms-password"
+                    type="password"
+                    placeholder="TMS系统密码"
+                    value={integrations.tmsService.password}
+                    onChange={(e) => setIntegrations(prev => ({
+                      ...prev,
+                      tmsService: { ...prev.tmsService, password: e.target.value }
+                    }))}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <Button onClick={() => handleSaveApiKey('TMS')}>
+                  保存配置
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleTestConnection('TMS')}>
+                  测试连接
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleTestConnection('TMS数据同步')}>
+                  测试数据同步
+                </Button>
+              </div>
+              
+              <div className="border-t pt-3">
+                <p className="text-sm font-medium mb-2">同步功能</p>
+                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                  <div>• 订单状态同步</div>
+                  <div>• 车辆位置同步</div>
+                  <div>• 运输进度更新</div>
+                  <div>• 异常事件推送</div>
+                </div>
               </div>
             </div>
           )}
