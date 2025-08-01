@@ -112,6 +112,84 @@ export type Database = {
           },
         ]
       }
+      api_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          name: string
+          permissions: Json | null
+          rate_limit: number | null
+          updated_at: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          name: string
+          permissions?: Json | null
+          rate_limit?: number | null
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          name?: string
+          permissions?: Json | null
+          rate_limit?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      api_usage_logs: {
+        Row: {
+          api_key_id: string
+          created_at: string
+          endpoint: string
+          id: string
+          request_ip: string | null
+          request_method: string
+          request_params: Json | null
+          response_status: number | null
+          response_time_ms: number | null
+        }
+        Insert: {
+          api_key_id: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          request_ip?: string | null
+          request_method: string
+          request_params?: Json | null
+          response_status?: number | null
+          response_time_ms?: number | null
+        }
+        Update: {
+          api_key_id?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          request_ip?: string | null
+          request_method?: string
+          request_params?: Json | null
+          response_status?: number | null
+          response_time_ms?: number | null
+        }
+        Relationships: []
+      }
       chat_channels: {
         Row: {
           channel_type: string

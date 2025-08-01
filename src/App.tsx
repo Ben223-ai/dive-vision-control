@@ -14,6 +14,7 @@ import Communication from "./pages/Communication";
 import Settings from "./pages/Settings";
 import RealTimeMap from "./pages/RealTimeMap";
 import FormDesigner from "./pages/FormDesigner";
+import ApiManagement from "./pages/ApiManagement";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
@@ -111,6 +112,11 @@ const App = () => (
         <Route path="/form-designer" element={
           <ProtectedRoute>
             <FormDesigner />
+          </ProtectedRoute>
+        } />
+        <Route path="/api-management" element={
+          <ProtectedRoute>
+            <ApiManagement />
           </ProtectedRoute>
         } />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

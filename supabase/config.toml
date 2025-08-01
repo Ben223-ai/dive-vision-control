@@ -22,15 +22,72 @@ pop3_port = 54326
 
 [storage]
 enabled = true
-file_size_limit = "50MiB"
+port = 54327
 
 [auth]
 enabled = true
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://dvrnufiqmqcziqpnehyz.supabase.co"]
-jwt_expiry = 3600
-enable_signup = true
-enable_confirmations = false
+port = 54328
+
+[auth.external.apple]
+enabled = false
+
+[auth.external.azure]
+enabled = false
+
+[auth.external.bitbucket]
+enabled = false
+
+[auth.external.discord]
+enabled = false
+
+[auth.external.facebook]
+enabled = false
+
+[auth.external.figma]
+enabled = false
+
+[auth.external.github]
+enabled = false
+
+[auth.external.gitlab]
+enabled = false
+
+[auth.external.google]
+enabled = false
+
+[auth.external.keycloak]
+enabled = false
+
+[auth.external.linkedin]
+enabled = false
+
+[auth.external.notion]
+enabled = false
+
+[auth.external.twitch]
+enabled = false
+
+[auth.external.twitter]
+enabled = false
+
+[auth.external.slack]
+enabled = false
+
+[auth.external.spotify]
+enabled = false
+
+[auth.external.workos]
+enabled = false
+
+[auth.external.zoom]
+enabled = false
+
+[edge-runtime]
+enabled = true
+port = 54329
 
 [functions.ai-alert-engine]
+verify_jwt = false
+
+[functions.order-details-api]
 verify_jwt = false
