@@ -38,6 +38,7 @@ export default function DeliveryTimePrediction() {
   const [loading, setLoading] = useState(false);
   const [predicting, setPredicting] = useState(false);
   const [training, setTraining] = useState(false);
+  const [useRealTime, setUseRealTime] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -164,7 +165,8 @@ export default function DeliveryTimePrediction() {
       const { data, error } = await supabase.functions.invoke('delivery-time-prediction', {
         body: {
           action: 'predict_single',
-          orderId: selectedOrderId
+          orderId: selectedOrderId,
+          useRealTime
         }
       });
 
@@ -173,8 +175,8 @@ export default function DeliveryTimePrediction() {
       }
 
       toast({
-        title: "预测完成",
-        description: `预计交付时间：${Math.round(data.predictedHours)}小时，置信度：${Math.round(data.confidenceScore * 100)}%`,
+        title: `${useRealTime ? '实时' : '基础'}预测完成`,
+        description: `预计交付时间：${Math.round(data.predictedHours)}小时，置信度：${Math.round(data.confidenceScore * 100)}%${useRealTime ? '（含天气路况）' : ''}`,
       });
 
       // 刷新预测列表
@@ -200,7 +202,8 @@ export default function DeliveryTimePrediction() {
       const { data, error } = await supabase.functions.invoke('delivery-time-prediction', {
         body: {
           action: 'predict_batch',
-          batchOrderIds: orderIds
+          batchOrderIds: orderIds,
+          useRealTime
         }
       });
 
@@ -209,8 +212,8 @@ export default function DeliveryTimePrediction() {
       }
 
       toast({
-        title: "批量预测完成",
-        description: `成功预测 ${data.predictions?.length || 0} 个订单的交付时间`,
+        title: `${useRealTime ? '实时' : '基础'}批量预测完成`,
+        description: `成功预测 ${data.predictions?.length || 0} 个订单的交付时间${useRealTime ? '（含实时特征）' : ''}`,
       });
 
       // 刷新预测列表
@@ -233,7 +236,8 @@ export default function DeliveryTimePrediction() {
     try {
       const { data, error } = await supabase.functions.invoke('delivery-time-prediction', {
         body: {
-          action: 'train_model'
+          action: 'train_model',
+          useRealTime
         }
       });
 
@@ -242,8 +246,8 @@ export default function DeliveryTimePrediction() {
       }
 
       toast({
-        title: "模型训练完成",
-        description: `训练样本：${data.trainingSamples}，准确率：${Math.round(data.modelAccuracy * 100)}%`,
+        title: `${useRealTime ? '实时特征' : '基础'}模型训练完成`,
+        description: `训练样本：${data.trainingSamples}，准确率：${Math.round(data.modelAccuracy * 100)}%${useRealTime ? '（集成天气路况）' : ''}`,
       });
 
       // 刷新模型指标
@@ -289,7 +293,7 @@ export default function DeliveryTimePrediction() {
 
   return (
     <div className="space-y-6">
-      {/* 头部信息 */}
+      {/* 头部信息和实时特征开关 */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-foreground flex items-center">
@@ -298,9 +302,23 @@ export default function DeliveryTimePrediction() {
           </h2>
           <p className="text-sm text-muted-foreground">基于深度学习的智能交付时间预测系统</p>
         </div>
-        <Badge variant="outline" className="text-primary">
-          AI驱动
-        </Badge>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground">实时特征</span>
+            <input
+              type="checkbox"
+              checked={useRealTime}
+              onChange={(e) => setUseRealTime(e.target.checked)}
+              className="toggle"
+            />
+            <span className="text-xs text-muted-foreground">
+              {useRealTime ? '天气+路况' : '基础算法'}
+            </span>
+          </div>
+          <Badge variant={useRealTime ? "default" : "secondary"}>
+            {useRealTime ? 'AI实时驱动' : '基础模式'}
+          </Badge>
+        </div>
       </div>
 
       {/* 模型指标卡片 */}
