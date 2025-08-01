@@ -14,6 +14,7 @@ import Communication from "./pages/Communication";
 import Settings from "./pages/Settings";
 import RealTimeMap from "./pages/RealTimeMap";
 import AnomalyDetection from "./pages/AnomalyDetection";
+import CostPrediction from "./pages/CostPrediction";
 import FormDesigner from "./pages/FormDesigner";
 import ApiManagement from "./pages/ApiManagement";
 import Auth from "./pages/Auth";
@@ -104,6 +105,13 @@ const App = () => (
           <ProtectedRoute>
             <AppLayout>
               <AnomalyDetection />
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/cost-prediction" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <CostPrediction />
             </AppLayout>
           </ProtectedRoute>
         } />
