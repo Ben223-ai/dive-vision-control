@@ -10,136 +10,246 @@ const corsHeaders = {
 // 实时特征API服务
 class RealTimeFeatureService {
   private readonly amapApiKey: string;
-  private readonly weatherApiKey: string;
 
   constructor() {
     this.amapApiKey = Deno.env.get('AMAP_API_KEY') || '';
-    this.weatherApiKey = Deno.env.get('WEATHER_API_KEY') || '';
+    console.log('初始化实时特征服务，API密钥状态:', this.amapApiKey ? '已配置' : '未配置');
   }
 
-  // 获取实时天气数据
+  // 获取高德地图天气数据
   async getWeatherData(city: string): Promise<any> {
-    if (!this.weatherApiKey) {
-      console.warn('Weather API key not configured, using default weather');
+    if (!this.amapApiKey) {
+      console.warn('高德地图API密钥未配置，使用默认天气数据');
       return {
         condition: 'clear',
         temperature: 20,
         humidity: 60,
         windSpeed: 5,
-        weatherFactor: 1.0
+        weatherFactor: 1.0,
+        description: '晴天'
       };
     }
 
     try {
+      // 使用高德地图天气API
       const response = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${this.weatherApiKey}&units=metric&lang=zh_cn`
+        `https://restapi.amap.com/v3/weather/weatherInfo?key=${this.amapApiKey}&city=${encodeURIComponent(city)}&extensions=base`
       );
       
       if (!response.ok) {
-        throw new Error(`Weather API error: ${response.status}`);
+        throw new Error(`高德天气API错误: ${response.status}`);
       }
 
       const data = await response.json();
       
+      if (data.status !== '1' || !data.lives || data.lives.length === 0) {
+        throw new Error('高德天气API返回无效数据');
+      }
+
+      const weather = data.lives[0];
+      
       // 天气影响因子计算
       let weatherFactor = 1.0;
-      const condition = data.weather[0].main.toLowerCase();
+      const condition = weather.weather;
       
       switch (condition) {
-        case 'clear':
-        case 'sunny':
+        case '晴':
+        case '少云':
           weatherFactor = 0.95; // 晴天，运输效率高
           break;
-        case 'clouds':
+        case '晴间多云':
+        case '多云':
           weatherFactor = 1.0; // 多云，正常
           break;
-        case 'rain':
-          weatherFactor = 1.25; // 雨天，影响运输
+        case '阴':
+          weatherFactor = 1.05; // 阴天，轻微影响
           break;
-        case 'snow':
-          weatherFactor = 1.5; // 雪天，严重影响
+        case '小雨':
+        case '阵雨':
+          weatherFactor = 1.15; // 小雨，轻度影响
           break;
-        case 'fog':
-        case 'mist':
-          weatherFactor = 1.3; // 雾霾天，影响视线
+        case '中雨':
+        case '大雨':
+          weatherFactor = 1.3; // 中大雨，影响运输
           break;
-        case 'thunderstorm':
-          weatherFactor = 1.6; // 暴风雨，严重影响
+        case '暴雨':
+        case '大暴雨':
+          weatherFactor = 1.6; // 暴雨，严重影响
+          break;
+        case '小雪':
+        case '中雪':
+          weatherFactor = 1.4; // 雪天，影响运输
+          break;
+        case '大雪':
+        case '暴雪':
+          weatherFactor = 1.8; // 大雪，严重影响
+          break;
+        case '雾':
+        case '霾':
+          weatherFactor = 1.25; // 雾霾天，影响视线
+          break;
+        case '沙尘暴':
+          weatherFactor = 1.7; // 沙尘暴，严重影响
           break;
         default:
           weatherFactor = 1.1;
       }
 
       // 温度影响（极端温度影响运输）
-      const temp = data.main.temp;
+      const temp = parseFloat(weather.temperature) || 20;
       if (temp < -10 || temp > 40) {
         weatherFactor *= 1.1;
       }
 
-      // 风速影响
-      const windSpeed = data.wind?.speed || 0;
-      if (windSpeed > 15) { // 强风
+      // 风力影响
+      const windPower = weather.windpower || '0级';
+      const windLevel = parseInt(windPower.replace(/[^0-9]/g, '')) || 0;
+      if (windLevel >= 6) { // 6级以上大风
         weatherFactor *= 1.05;
       }
+
+      console.log('获取天气数据成功:', {
+        city,
+        condition,
+        temperature: temp,
+        windPower,
+        weatherFactor
+      });
 
       return {
         condition,
         temperature: temp,
-        humidity: data.main.humidity,
-        windSpeed,
+        humidity: parseFloat(weather.humidity) || 60,
+        windSpeed: windLevel * 2, // 简单转换为风速
+        windPower,
         weatherFactor,
-        description: data.weather[0].description
+        description: condition,
+        updateTime: weather.reporttime
       };
     } catch (error) {
-      console.error('Weather API error:', error);
+      console.error('高德天气API错误:', error);
       return {
         condition: 'unknown',
         temperature: 20,
         humidity: 60,
         windSpeed: 5,
-        weatherFactor: 1.0
+        weatherFactor: 1.0,
+        description: '天气数据获取失败'
       };
     }
   }
 
-  // 获取实时路况数据
+  // 获取高德地图路况数据
   async getTrafficData(origin: string, destination: string): Promise<any> {
     if (!this.amapApiKey) {
-      console.warn('Amap API key not configured, using estimated traffic');
-      return {
-        trafficFactor: 1.0,
-        congestionLevel: 'unknown',
-        estimatedDuration: null
-      };
+      console.warn('高德地图API密钥未配置，使用估算路况');
+      return this.getDefaultTrafficData();
     }
 
     try {
-      // 根据当前时间判断高峰期（模拟路况）
-      const hour = new Date().getHours();
+      // 使用高德地图路径规划API获取实时路况
+      const response = await fetch(
+        `https://restapi.amap.com/v3/direction/driving?origin=&destination=&key=${this.amapApiKey}&strategy=0&extensions=all&output=json`
+      );
+
+      if (!response.ok) {
+        throw new Error(`高德路况API错误: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
       let trafficFactor = 1.0;
       let congestionLevel = 'smooth';
-      
-      if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19)) {
-        trafficFactor = 1.2;
-        congestionLevel = 'moderate';
-      } else if (hour >= 22 || hour <= 6) {
-        trafficFactor = 0.9;
-        congestionLevel = 'smooth';
+
+      if (data.status === '1' && data.route && data.route.paths && data.route.paths.length > 0) {
+        const path = data.route.paths[0];
+        
+        // 分析路径的拥堵情况
+        if (path.steps) {
+          let totalDuration = 0;
+          let totalDistance = 0;
+          
+          path.steps.forEach((step: any) => {
+            totalDuration += parseInt(step.duration) || 0;
+            totalDistance += parseInt(step.distance) || 0;
+          });
+          
+          // 根据速度计算拥堵程度
+          const avgSpeed = totalDistance > 0 ? (totalDistance / 1000) / (totalDuration / 3600) : 50;
+          
+          if (avgSpeed < 20) {
+            trafficFactor = 1.4;
+            congestionLevel = 'heavy';
+          } else if (avgSpeed < 35) {
+            trafficFactor = 1.2;
+            congestionLevel = 'moderate';
+          } else if (avgSpeed < 50) {
+            trafficFactor = 1.05;
+            congestionLevel = 'light';
+          }
+        }
       }
+
+      // 叠加时间段影响
+      const timeTrafficFactor = this.getTimeBasedTrafficFactor();
+      trafficFactor *= timeTrafficFactor.factor;
+      
+      if (timeTrafficFactor.isPeak && congestionLevel === 'smooth') {
+        congestionLevel = 'moderate';
+      }
+
+      console.log('获取路况数据成功:', {
+        trafficFactor,
+        congestionLevel,
+        timeBasedFactor: timeTrafficFactor
+      });
 
       return {
         trafficFactor,
         congestionLevel,
-        estimatedDuration: null
+        estimatedDuration: data.route?.paths?.[0]?.duration || null,
+        distance: data.route?.paths?.[0]?.distance || null
       };
     } catch (error) {
-      console.error('Traffic API error:', error);
-      return {
-        trafficFactor: 1.0,
-        congestionLevel: 'unknown',
-        estimatedDuration: null
-      };
+      console.error('高德路况API错误:', error);
+      return this.getDefaultTrafficData();
     }
+  }
+
+  // 获取默认路况数据（当API不可用时）
+  private getDefaultTrafficData(): any {
+    const timeTrafficFactor = this.getTimeBasedTrafficFactor();
+    
+    return {
+      trafficFactor: timeTrafficFactor.factor,
+      congestionLevel: timeTrafficFactor.isPeak ? 'moderate' : 'smooth',
+      estimatedDuration: null
+    };
+  }
+
+  // 基于时间的路况因子
+  private getTimeBasedTrafficFactor(): { factor: number; isPeak: boolean } {
+    const hour = new Date().getHours();
+    const day = new Date().getDay(); // 0=周日, 1=周一...6=周六
+    
+    // 工作日高峰期
+    if (day >= 1 && day <= 5) {
+      if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19)) {
+        return { factor: 1.3, isPeak: true };
+      }
+    }
+    
+    // 深夜时段
+    if (hour >= 23 || hour <= 5) {
+      return { factor: 0.85, isPeak: false };
+    }
+    
+    // 周末稍微轻松
+    if (day === 0 || day === 6) {
+      return { factor: 0.95, isPeak: false };
+    }
+    
+    return { factor: 1.0, isPeak: false };
   }
 
   // 获取综合实时因子
@@ -158,8 +268,30 @@ class RealTimeFeatureService {
 
   // 从地址中提取城市名
   private extractCity(address: string): string {
-    const cityMatch = address.match(/([^省]+省)?([^市]+市)/);
-    return cityMatch ? cityMatch[2] || cityMatch[1] : address.split(/[省市区县]/)[0];
+    // 更精确的城市提取逻辑
+    const cityMatch = address.match(/([^省]+省)?([^市]+市|[^区]+区|[^县]+县)/);
+    if (cityMatch) {
+      // 优先返回市级单位，其次是区县
+      return cityMatch[2] ? cityMatch[2].replace(/[市区县]/g, '') : 
+             cityMatch[1] ? cityMatch[1].replace(/省/g, '') : 
+             address.split(/[省市区县]/)[0];
+    }
+    
+    // 处理特殊地名
+    const specialCities = {
+      '北京': '北京市',
+      '上海': '上海市', 
+      '天津': '天津市',
+      '重庆': '重庆市'
+    };
+    
+    for (const [key, value] of Object.entries(specialCities)) {
+      if (address.includes(key)) {
+        return key;
+      }
+    }
+    
+    return address.split(/[省市区县]/)[0] || '北京';
   }
 }
 

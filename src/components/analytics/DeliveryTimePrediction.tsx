@@ -39,13 +39,21 @@ export default function DeliveryTimePrediction() {
   const [predicting, setPredicting] = useState(false);
   const [training, setTraining] = useState(false);
   const [useRealTime, setUseRealTime] = useState(true);
+  const [apiKeysConfigured, setApiKeysConfigured] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchOrders();
     fetchModelMetrics();
     fetchRecentPredictions();
+    checkApiKeysConfiguration();
   }, []);
+
+  const checkApiKeysConfiguration = () => {
+    const amapKey = localStorage.getItem('amap-api-key');
+    const weatherKey = localStorage.getItem('weather-api-key');
+    setApiKeysConfigured(!!(amapKey || weatherKey));
+  };
 
   const fetchOrders = async () => {
     try {
@@ -160,6 +168,15 @@ export default function DeliveryTimePrediction() {
       return;
     }
 
+    if (useRealTime && !apiKeysConfigured) {
+      toast({
+        title: "API密钥未配置",
+        description: "请在设置页面配置高德地图API密钥以启用实时特征",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setPredicting(true);
     try {
       const { data, error } = await supabase.functions.invoke('delivery-time-prediction', {
@@ -195,6 +212,15 @@ export default function DeliveryTimePrediction() {
   };
 
   const handleBatchPrediction = async () => {
+    if (useRealTime && !apiKeysConfigured) {
+      toast({
+        title: "API密钥未配置",
+        description: "请在设置页面配置高德地图API密钥以启用实时特征",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setPredicting(true);
     try {
       const orderIds = orders.slice(0, 10).map(order => order.id); // 预测前10个订单
@@ -318,6 +344,11 @@ export default function DeliveryTimePrediction() {
           <Badge variant={useRealTime ? "default" : "secondary"}>
             {useRealTime ? 'AI实时驱动' : '基础模式'}
           </Badge>
+          {useRealTime && !apiKeysConfigured && (
+            <Badge variant="destructive" className="text-xs">
+              需配置API密钥
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -405,6 +436,19 @@ export default function DeliveryTimePrediction() {
                 </SelectContent>
               </Select>
             </div>
+            
+            {useRealTime && !apiKeysConfigured && (
+              <div className="flex-1">
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    ⚠️ 实时预测需要配置高德地图API密钥
+                  </p>
+                  <Button variant="link" size="sm" className="h-auto p-0 text-amber-800" asChild>
+                    <a href="/settings">前往设置配置</a>
+                  </Button>
+                </div>
+              </div>
+            )}
             
             <div className="flex gap-2">
               <Button 

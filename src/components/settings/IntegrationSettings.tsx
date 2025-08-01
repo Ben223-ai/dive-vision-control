@@ -7,14 +7,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Link, MapPin, Mail, MessageSquare, Bell, Truck } from "lucide-react";
+import { Eye, EyeOff, Link, MapPin, Mail, MessageSquare, Bell, Truck, Brain, Cloud } from "lucide-react";
 
 export const IntegrationSettings = () => {
   const [showApiKeys, setShowApiKeys] = useState({
     google: false,
     webhook: false,
     email: false,
-    tms: false
+    tms: false,
+    amap: false,
+    weather: false
   });
 
   const [integrations, setIntegrations] = useState({
@@ -22,6 +24,22 @@ export const IntegrationSettings = () => {
       enabled: true,
       apiKey: "AIzaSyC4R6AN7SmxxAEeOz_P7MjE9t...",
       status: "connected"
+    },
+    amapService: {
+      enabled: false,
+      apiKey: "",
+      status: "disconnected"
+    },
+    weatherService: {
+      enabled: false,
+      provider: "amap",
+      apiKey: "",
+      status: "disconnected"
+    },
+    aiPrediction: {
+      enabled: false,
+      useRealTime: true,
+      status: "disconnected"
     },
     tmsService: {
       enabled: false,
@@ -91,6 +109,10 @@ export const IntegrationSettings = () => {
           token: integrations.tmsService.token,
           authorization: integrations.tmsService.token
         });
+      } else if (serviceKey === 'amap' || serviceKey === '高德地图') {
+        localStorage.setItem('amap-api-key', integrations.amapService.apiKey);
+      } else if (serviceKey === 'weather' || serviceKey === '天气服务') {
+        localStorage.setItem('weather-api-key', integrations.weatherService.apiKey);
       }
       
       toast({
@@ -129,6 +151,50 @@ export const IntegrationSettings = () => {
           description: isConnected ? `${service}连接正常` : `无法连接到${service}`,
           variant: isConnected ? "default" : "destructive",
         });
+      } else if (serviceKey === 'amap' || serviceKey === '高德地图') {
+        // 测试高德地图API连接
+        if (!integrations.amapService.apiKey) {
+          toast({
+            title: "API密钥缺失",
+            description: "请先输入高德地图API密钥",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setIntegrations(prev => ({
+          ...prev,
+          amapService: { ...prev.amapService, status: "connecting" }
+        }));
+
+        try {
+          // 测试高德地图API
+          const response = await fetch(
+            `https://restapi.amap.com/v3/config/district?key=${integrations.amapService.apiKey}&keywords=中国&subdistrict=0`
+          );
+          const isConnected = response.ok;
+          
+          setIntegrations(prev => ({
+            ...prev,
+            amapService: { ...prev.amapService, status: isConnected ? "connected" : "error" }
+          }));
+
+          toast({
+            title: isConnected ? "连接成功" : "连接失败",
+            description: isConnected ? "高德地图API连接正常" : "高德地图API连接失败，请检查密钥",
+            variant: isConnected ? "default" : "destructive",
+          });
+        } catch (error) {
+          setIntegrations(prev => ({
+            ...prev,
+            amapService: { ...prev.amapService, status: "error" }
+          }));
+          toast({
+            title: "连接失败",
+            description: "高德地图API测试失败",
+            variant: "destructive",
+          });
+        }
       } else {
         // 模拟其他服务的连接测试
         toast({
@@ -225,6 +291,230 @@ export const IntegrationSettings = () => {
               </div>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      {/* AI预测服务集成 */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            AI预测服务
+          </CardTitle>
+          <CardDescription>配置智能交付时间预测所需的API服务</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* 高德地图API */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4" />
+                  <span className="font-medium">高德地图API</span>
+                  {renderStatusBadge(integrations.amapService.status)}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  用于路况查询和地理编码服务
+                </p>
+              </div>
+              <Switch
+                checked={integrations.amapService.enabled}
+                onCheckedChange={(checked) => handleToggleIntegration('amapService', checked)}
+              />
+            </div>
+
+            {integrations.amapService.enabled && (
+              <div className="space-y-3 p-4 bg-muted rounded-lg">
+                <div className="space-y-2">
+                  <Label htmlFor="amap-api-key">API密钥</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        id="amap-api-key"
+                        type={showApiKeys.amap ? "text" : "password"}
+                        placeholder="请输入高德地图API密钥"
+                        value={integrations.amapService.apiKey}
+                        onChange={(e) => setIntegrations(prev => ({
+                          ...prev,
+                          amapService: { ...prev.amapService, apiKey: e.target.value }
+                        }))}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowApiKeys(prev => ({ ...prev, amap: !prev.amap }))}
+                      >
+                        {showApiKeys.amap ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <Button onClick={() => handleSaveApiKey('高德地图')}>
+                      保存
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleTestConnection('高德地图')}>
+                    测试连接
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href="https://console.amap.com/dev/key/app" target="_blank" rel="noopener noreferrer">
+                      获取API密钥
+                    </a>
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <p>• 支持实时路况查询</p>
+                  <p>• 地理编码和逆地理编码</p>
+                  <p>• 路径规划和导航</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* 天气服务 */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Cloud className="h-4 w-4" />
+                  <span className="font-medium">天气服务</span>
+                  {renderStatusBadge(integrations.weatherService.status)}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  实时天气数据，影响运输时间预测
+                </p>
+              </div>
+              <Switch
+                checked={integrations.weatherService.enabled}
+                onCheckedChange={(checked) => handleToggleIntegration('weatherService', checked)}
+              />
+            </div>
+
+            {integrations.weatherService.enabled && (
+              <div className="space-y-3 p-4 bg-muted rounded-lg">
+                <div className="space-y-2">
+                  <Label htmlFor="weather-api-key">高德天气API密钥</Label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        id="weather-api-key"
+                        type={showApiKeys.weather ? "text" : "password"}
+                        placeholder="使用高德地图API密钥"
+                        value={integrations.weatherService.apiKey || integrations.amapService.apiKey}
+                        onChange={(e) => setIntegrations(prev => ({
+                          ...prev,
+                          weatherService: { ...prev.weatherService, apiKey: e.target.value }
+                        }))}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowApiKeys(prev => ({ ...prev, weather: !prev.weather }))}
+                      >
+                        {showApiKeys.weather ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <Button onClick={() => handleSaveApiKey('天气服务')}>
+                      保存
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => handleTestConnection('天气服务')}>
+                    测试连接
+                  </Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href="https://lbs.amap.com/api/webservice/guide/api/weatherinfo/" target="_blank" rel="noopener noreferrer">
+                      API文档
+                    </a>
+                  </Button>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <p>• 实时天气状况</p>
+                  <p>• 温度、湿度、风速</p>
+                  <p>• 天气预报数据</p>
+                  <p>• 恶劣天气预警</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* AI预测功能配置 */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4" />
+                  <span className="font-medium">LSTM智能预测</span>
+                  {renderStatusBadge(integrations.aiPrediction.status)}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  基于机器学习的交付时间预测
+                </p>
+              </div>
+              <Switch
+                checked={integrations.aiPrediction.enabled}
+                onCheckedChange={(checked) => {
+                  setIntegrations(prev => ({
+                    ...prev,
+                    aiPrediction: { 
+                      ...prev.aiPrediction, 
+                      enabled: checked,
+                      status: checked ? "connected" : "disconnected"
+                    }
+                  }));
+                }}
+              />
+            </div>
+
+            {integrations.aiPrediction.enabled && (
+              <div className="space-y-3 p-4 bg-muted rounded-lg">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">启用实时特征</span>
+                  <Switch
+                    checked={integrations.aiPrediction.useRealTime}
+                    onCheckedChange={(checked) => setIntegrations(prev => ({
+                      ...prev,
+                      aiPrediction: { ...prev.aiPrediction, useRealTime: checked }
+                    }))}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  <p className="mb-2">预测特征包括:</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    <p>• 历史运输数据</p>
+                    <p>• 承运商表现</p>
+                    <p>• 货物重量体积</p>
+                    <p>• 运输距离路线</p>
+                    {integrations.aiPrediction.useRealTime && (
+                      <>
+                        <p>• 实时天气状况</p>
+                        <p>• 实时路况信息</p>
+                        <p>• 时间段影响</p>
+                        <p>• 季节性因子</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 
