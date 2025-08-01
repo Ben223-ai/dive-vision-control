@@ -184,26 +184,18 @@ const CreateOrderDialog = () => {
   };
 
   const validateForm = (formData: any) => {
-    if (!formData.customer_name?.trim()) {
-      toast.error('请输入客户名称');
+    // 基本验证：只检查是否有数据和订单明细
+    if (!formData || Object.keys(formData).length === 0) {
+      toast.error('请填写表单信息');
       return false;
     }
-    if (!formData.origin?.trim()) {
-      toast.error('请输入起点地址');
-      return false;
-    }
-    if (!formData.destination?.trim()) {
-      toast.error('请输入终点地址');
-      return false;
-    }
-    if (!formData.carrier?.trim()) {
-      toast.error('请选择承运商');
-      return false;
-    }
+    
     if (orderItems.length === 0) {
       toast.error('请至少添加一个订单明细');
       return false;
     }
+    
+    // 验证订单明细
     for (const item of orderItems) {
       if (!item.item_name.trim()) {
         toast.error('请填写所有明细的商品名称');
