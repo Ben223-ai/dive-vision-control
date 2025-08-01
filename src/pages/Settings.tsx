@@ -8,6 +8,7 @@ import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
 import PermissionManagement from "@/components/settings/PermissionManagement";
 import AdvancedPermissionConfig from "@/components/settings/AdvancedPermissionConfig";
+import DataPermissionConfig from "@/components/settings/DataPermissionConfig";
 
 const Settings = () => {
   return (
@@ -102,15 +103,19 @@ const Settings = () => {
 
         <TabsContent value="permissions" className="space-y-4">
           <Tabs defaultValue="basic" className="w-full">
-            <TabsList>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="basic">基础权限</TabsTrigger>
               <TabsTrigger value="advanced">高级配置</TabsTrigger>
+              <TabsTrigger value="data">数据权限</TabsTrigger>
             </TabsList>
             <TabsContent value="basic">
               <PermissionManagement />
             </TabsContent>
             <TabsContent value="advanced">
               <AdvancedPermissionConfig />
+            </TabsContent>
+            <TabsContent value="data">
+              <DataPermissionConfig />
             </TabsContent>
           </Tabs>
         </TabsContent>
