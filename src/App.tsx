@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./contexts/AuthContext";
+import { PermissionProvider, PageGuard, PERMISSIONS } from "./components/permission";
 import Index from "./pages/Index";
 import Orders from "./pages/Orders";
 import Alerts from "./pages/Alerts";
@@ -36,7 +37,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
+  return (
+    <PermissionProvider>
+      {children}
+    </PermissionProvider>
+  );
 }
 
 // 布局组件
