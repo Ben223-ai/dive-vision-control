@@ -512,6 +512,7 @@ export type Database = {
           actual_delivery: string | null
           carrier: string | null
           created_at: string
+          custom_fields: Json | null
           customer_name: string | null
           destination: string
           estimated_delivery: string | null
@@ -529,6 +530,7 @@ export type Database = {
           actual_delivery?: string | null
           carrier?: string | null
           created_at?: string
+          custom_fields?: Json | null
           customer_name?: string | null
           destination: string
           estimated_delivery?: string | null
@@ -546,6 +548,7 @@ export type Database = {
           actual_delivery?: string | null
           carrier?: string | null
           created_at?: string
+          custom_fields?: Json | null
           customer_name?: string | null
           destination?: string
           estimated_delivery?: string | null

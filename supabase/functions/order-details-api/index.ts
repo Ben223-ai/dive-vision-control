@@ -33,6 +33,7 @@ interface OrderDetails {
   actual_delivery: string | null;
   created_at: string;
   updated_at: string;
+  custom_fields: any; // 添加自定义字段支持
   order_items: Array<{
     id: string;
     item_name: string;
@@ -303,6 +304,7 @@ serve(async (req) => {
       ...orderDetails,
       // 移除内部ID等敏感信息
       id: undefined,
+      custom_fields: orderDetails.custom_fields || {}, // 包含自定义字段
       order_items: orderDetails.order_items.map(item => ({
         ...item,
         id: undefined,
@@ -314,6 +316,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         data: safeOrderDetails,
+        custom_fields: orderDetails.custom_fields || {}, // 在顶级也提供自定义字段
         timestamp: new Date().toISOString()
       }),
       { 

@@ -67,13 +67,27 @@ const CreateOrderDialog = () => {
 
     setLoading(true);
     try {
+      // 分离标准字段和自定义字段
+      const standardFields = ['order_number', 'customer_name', 'origin', 'destination', 'carrier', 'estimated_delivery'];
+      const standardData: any = {};
+      const customData: any = {};
+
+      Object.keys(formData).forEach(key => {
+        if (standardFields.includes(key)) {
+          standardData[key] = formData[key];
+        } else {
+          customData[key] = formData[key];
+        }
+      });
+
       const orderData = {
-        ...formData,
-        order_number: formData.order_number || generateOrderNumber(),
+        ...standardData,
+        order_number: standardData.order_number || generateOrderNumber(),
         status: 'pending',
         progress: 0,
-        estimated_delivery: formData.estimated_delivery?.toISOString?.() || formData.estimated_delivery,
+        estimated_delivery: standardData.estimated_delivery?.toISOString?.() || standardData.estimated_delivery,
         total_amount: calculateTotalAmount(),
+        custom_fields: customData, // 存储自定义字段数据
       };
 
       // 创建订单
