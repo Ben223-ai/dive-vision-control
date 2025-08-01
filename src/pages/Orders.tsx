@@ -31,9 +31,8 @@ const Orders = () => {
                 
                 {/* 权限控制的操作按钮 */}
                 <div className="flex gap-2">
-                  <PermissionGuard permission={PERMISSIONS.ORDERS_CREATE}>
-                    <CreateOrderDialog />
-                  </PermissionGuard>
+                  {/* 临时移除权限控制，所有用户都可以看到创建订单按钮 */}
+                  <CreateOrderDialog />
                   
                   <PermissionBtn
                     permission={PERMISSIONS.ORDERS_EXPORT}
