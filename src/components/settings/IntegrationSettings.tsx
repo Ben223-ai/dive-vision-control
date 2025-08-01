@@ -169,29 +169,94 @@ export const IntegrationSettings = () => {
 
         try {
           // 测试高德地图API
-          const response = await fetch(
-            `https://restapi.amap.com/v3/config/district?key=${integrations.amapService.apiKey}&keywords=中国&subdistrict=0`
-          );
-          const isConnected = response.ok;
+          const testUrl = `https://restapi.amap.com/v3/config/district?key=${integrations.amapService.apiKey}&keywords=中国&subdistrict=0`;
+          console.log('Testing Amap API with URL:', testUrl);
+          
+          const response = await fetch(testUrl);
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+          
+          // 生成详细的curl信息
+          const curlCommand = `curl -X GET "${testUrl}" \\
+  -H "Accept: application/json" \\
+  -H "Content-Type: application/json" \\
+  -H "User-Agent: Mozilla/5.0" \\
+  -v`;
+          
+          console.log('等效的curl命令:', curlCommand);
+          
+          let responseData;
+          try {
+            responseData = await response.json();
+            console.log('Response data:', responseData);
+          } catch (jsonError) {
+            console.log('Response text:', await response.text());
+          }
+          
+          const isConnected = response.ok && response.status === 200;
           
           setIntegrations(prev => ({
             ...prev,
             amapService: { ...prev.amapService, status: isConnected ? "connected" : "error" }
           }));
 
-          toast({
-            title: isConnected ? "连接成功" : "连接失败",
-            description: isConnected ? "高德地图API连接正常" : "高德地图API连接失败，请检查密钥",
-            variant: isConnected ? "default" : "destructive",
-          });
+          // 显示详细错误信息
+          if (!isConnected) {
+            const errorInfo = `
+状态码: ${response.status}
+错误信息: ${responseData?.info || '未知错误'}
+响应代码: ${responseData?.infocode || 'N/A'}
+
+调试Curl命令:
+${curlCommand}
+
+常见问题:
+1. API密钥无效或已过期
+2. API服务未开通或余额不足  
+3. 域名未添加到白名单
+4. 请求频率超限
+            `.trim();
+            
+            navigator.clipboard.writeText(curlCommand).catch(() => {});
+            
+            toast({
+              title: "API测试失败",
+              description: errorInfo,
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "连接成功",
+              description: "高德地图API连接正常",
+            });
+          }
         } catch (error) {
+          console.error('Fetch error:', error);
+          
+          const curlCommand = `curl -X GET "https://restapi.amap.com/v3/config/district?key=${integrations.amapService.apiKey}&keywords=中国&subdistrict=0" \\
+  -H "Accept: application/json" \\
+  -H "Content-Type: application/json" \\
+  -H "User-Agent: Mozilla/5.0" \\
+  -v`;
+          
+          console.log('调试curl命令:', curlCommand);
+          navigator.clipboard.writeText(curlCommand).catch(() => {});
+          
           setIntegrations(prev => ({
             ...prev,
             amapService: { ...prev.amapService, status: "error" }
           }));
+          
           toast({
-            title: "连接失败",
-            description: "高德地图API测试失败",
+            title: "网络连接失败",
+            description: `错误: ${error instanceof Error ? error.message : '未知网络错误'}
+            
+调试curl命令已复制到剪贴板
+
+可能原因:
+1. CORS跨域问题
+2. 网络连接异常
+3. API服务器不可达`,
             variant: "destructive",
           });
         }
