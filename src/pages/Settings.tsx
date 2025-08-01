@@ -7,6 +7,7 @@ import { AccountManagement } from "@/components/settings/AccountManagement";
 import { SecuritySettings } from "@/components/settings/SecuritySettings";
 import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
 import PermissionManagement from "@/components/settings/PermissionManagement";
+import AdvancedPermissionConfig from "@/components/settings/AdvancedPermissionConfig";
 
 const Settings = () => {
   return (
@@ -100,7 +101,18 @@ const Settings = () => {
         </TabsContent>
 
         <TabsContent value="permissions" className="space-y-4">
-          <PermissionManagement />
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList>
+              <TabsTrigger value="basic">基础权限</TabsTrigger>
+              <TabsTrigger value="advanced">高级配置</TabsTrigger>
+            </TabsList>
+            <TabsContent value="basic">
+              <PermissionManagement />
+            </TabsContent>
+            <TabsContent value="advanced">
+              <AdvancedPermissionConfig />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="integrations" className="space-y-4">
