@@ -79,6 +79,9 @@ const CreateOrderDialog = () => {
   };
 
   const handleDynamicFormSubmit = async (formData: any) => {
+    console.log('CreateOrderDialog handleDynamicFormSubmit called with:', formData);
+    console.log('Order items:', orderItems);
+    
     if (!validateForm(formData)) return;
 
     setLoading(true);
@@ -184,8 +187,12 @@ const CreateOrderDialog = () => {
   };
 
   const validateForm = (formData: any) => {
+    console.log('Validating form data:', formData);
+    console.log('Order items count:', orderItems.length);
+    
     // 基本验证：只检查是否有数据和订单明细
     if (!formData || Object.keys(formData).length === 0) {
+      console.log('Validation failed: No form data');
       toast.error('请填写表单信息');
       return false;
     }

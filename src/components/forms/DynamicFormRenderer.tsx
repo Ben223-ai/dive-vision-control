@@ -84,6 +84,10 @@ const DynamicFormRenderer = ({
   };
 
   const handleFormSubmit = (data: any) => {
+    console.log('DynamicFormRenderer handleFormSubmit called with data:', data);
+    console.log('Fields:', fields);
+    console.log('onSubmit callback exists:', !!onSubmit);
+    
     // 处理加密字段
     const processedData = { ...data };
     fields.forEach(field => {
@@ -93,6 +97,7 @@ const DynamicFormRenderer = ({
       }
     });
 
+    console.log('Processed data:', processedData);
     onSubmit?.(processedData);
   };
 
@@ -316,7 +321,11 @@ const DynamicFormRenderer = ({
 
       {!readonly && (
         <div className="flex justify-end">
-          <Button type="submit" disabled={loading}>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            onClick={() => console.log('Submit button clicked')}
+          >
             {loading ? '提交中...' : '提交'}
           </Button>
         </div>
