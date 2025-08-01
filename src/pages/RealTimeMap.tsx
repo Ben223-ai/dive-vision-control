@@ -10,10 +10,12 @@ import {
   RotateCcw,
   Layers,
   Filter,
-  Settings
+  Settings,
+  MapPin
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import MapApiKeyDialog from "@/components/MapApiKeyDialog";
+import GeocodingPanel from "@/components/map/GeocodingPanel";
 
 // 模拟运输数据
 const mockTransportData = [
@@ -267,6 +269,40 @@ export default function RealTimeMap() {
     }
   };
 
+  const handleLocationSelect = (lng: number, lat: number, address: string) => {
+    if (map.current) {
+      map.current.setCenter([lng, lat]);
+      map.current.setZoom(16);
+      
+      // 添加标记点
+      AMapLoader.load({
+        key: apiKey,
+        version: "2.0"
+      }).then((AMap) => {
+        const marker = new AMap.Marker({
+          position: [lng, lat],
+          title: address,
+          content: `<div class="flex items-center justify-center w-6 h-6 bg-red-500 rounded-full">
+            <div class="w-2 h-2 bg-white rounded-full"></div>
+          </div>`
+        });
+        
+        // 创建信息窗体
+        const infoWindow = new AMap.InfoWindow({
+          content: `<div class="p-3"><div class="font-medium mb-1">搜索位置</div><div class="text-sm text-gray-600">${address}</div></div>`,
+          anchor: "bottom-center",
+          offset: new AMap.Pixel(0, -20)
+        });
+        
+        marker.on("click", () => {
+          infoWindow.open(map.current, [lng, lat]);
+        });
+        
+        map.current.add(marker);
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* 页面标题 */}
@@ -296,9 +332,9 @@ export default function RealTimeMap() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* 车辆列表 */}
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+        {/* 车辆列表和地理编码 */}
+        <div className="xl:col-span-1 space-y-4">
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">运输车辆</h3>
@@ -342,10 +378,18 @@ export default function RealTimeMap() {
               })}
             </div>
           </Card>
+          
+          {/* 地理编码面板 */}
+          {apiKey && (
+            <GeocodingPanel
+              apiKey={apiKey}
+              onLocationSelect={handleLocationSelect}
+            />
+          )}
         </div>
 
         {/* 地图容器 */}
-        <div className="lg:col-span-3">
+        <div className="xl:col-span-4">
           <Card className="overflow-hidden">
             <div className="relative">
               <div 
