@@ -245,6 +245,62 @@ export type Database = {
           },
         ]
       }
+      order_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          item_description: string | null
+          item_name: string
+          order_id: string
+          quantity: number
+          sku: string | null
+          total_price: number | null
+          unit_price: number
+          updated_at: string
+          volume: number | null
+          weight: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          item_description?: string | null
+          item_name: string
+          order_id: string
+          quantity?: number
+          sku?: string | null
+          total_price?: number | null
+          unit_price?: number
+          updated_at?: string
+          volume?: number | null
+          weight?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          item_description?: string | null
+          item_name?: string
+          order_id?: string
+          quantity?: number
+          sku?: string | null
+          total_price?: number | null
+          unit_price?: number
+          updated_at?: string
+          volume?: number | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_tracking_events: {
         Row: {
           created_at: string
