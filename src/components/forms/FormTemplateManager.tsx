@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Settings, Eye, EyeOff, Lock, Unlock, GripVertical } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -42,6 +43,8 @@ const FormTemplateManager = () => {
   const [fields, setFields] = useState<FormField[]>([]);
   const [editingField, setEditingField] = useState<FormField | null>(null);
   const [isFieldDialogOpen, setIsFieldDialogOpen] = useState(false);
+  const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<FormTemplate | null>(null);
   const [loading, setLoading] = useState(false);
 
   const sensors = useSensors(
@@ -147,6 +150,45 @@ const FormTemplateManager = () => {
         // 恢复原始顺序
         loadFields(selectedTemplate!.id);
       }
+    }
+  };
+
+  const saveTemplate = async (templateData: Partial<FormTemplate>) => {
+    setLoading(true);
+    try {
+      if (editingTemplate) {
+        // 更新模板
+        const { error } = await supabase
+          .from('form_templates')
+          .update(templateData)
+          .eq('id', editingTemplate.id);
+
+        if (error) throw error;
+        toast.success('模板更新成功');
+      } else {
+        // 创建新模板
+        const { error } = await supabase
+          .from('form_templates')
+          .insert([{
+            name: templateData.name!,
+            description: templateData.description,
+            template_type: templateData.template_type || 'order_create',
+            is_default: templateData.is_default || false,
+            is_active: true
+          }]);
+
+        if (error) throw error;
+        toast.success('模板创建成功');
+      }
+
+      loadTemplates();
+      setIsTemplateDialogOpen(false);
+      setEditingTemplate(null);
+    } catch (error) {
+      console.error('保存模板失败:', error);
+      toast.error('保存模板失败');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -261,10 +303,26 @@ const FormTemplateManager = () => {
               </SelectContent>
             </Select>
             
-            <Button variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              新建模板
-            </Button>
+            <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" onClick={() => setEditingTemplate(null)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  新建模板
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingTemplate ? '编辑模板' : '新建模板'}
+                  </DialogTitle>
+                </DialogHeader>
+                <TemplateEditor
+                  template={editingTemplate}
+                  onSave={saveTemplate}
+                  loading={loading}
+                />
+              </DialogContent>
+            </Dialog>
           </div>
         </CardContent>
       </Card>
@@ -475,6 +533,90 @@ const FieldEditor = ({ field, fieldTypes, onSave, loading }: {
           />
           <Label htmlFor="is_encrypted">加密</Label>
         </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button type="submit" disabled={loading}>
+          {loading ? '保存中...' : '保存'}
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+// 模板编辑器组件
+const TemplateEditor = ({ template, onSave, loading }: {
+  template: FormTemplate | null;
+  onSave: (data: Partial<FormTemplate>) => void;
+  loading: boolean;
+}) => {
+  const [formData, setFormData] = useState({
+    name: template?.name || '',
+    description: template?.description || '',
+    template_type: template?.template_type || 'order_create',
+    is_default: template?.is_default || false,
+  });
+
+  const templateTypes = [
+    { value: 'order_create', label: '订单创建' },
+    { value: 'order_edit', label: '订单编辑' },
+    { value: 'customer_info', label: '客户信息' },
+    { value: 'product_info', label: '产品信息' },
+    { value: 'custom', label: '自定义' },
+  ];
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="template_name">模板名称</Label>
+        <Input
+          id="template_name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          placeholder="输入模板名称"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="template_description">模板描述</Label>
+        <Textarea
+          id="template_description"
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="输入模板描述"
+          rows={3}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="template_type">模板类型</Label>
+        <Select value={formData.template_type} onValueChange={(value) => setFormData({ ...formData, template_type: value })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {templateTypes.map(type => (
+              <SelectItem key={type.value} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="is_default"
+          checked={formData.is_default}
+          onCheckedChange={(checked) => setFormData({ ...formData, is_default: checked })}
+        />
+        <Label htmlFor="is_default">设为默认模板</Label>
       </div>
 
       <div className="flex justify-end gap-2">
