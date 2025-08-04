@@ -408,17 +408,17 @@ API使用说明：
         </CardContent>
       </Card>
 
-      {/* AI预测服务集成 */}
+      {/* 高德地图服务集成 */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5" />
-            AI预测服务
+            <MapPin className="h-5 w-5" />
+            高德地图服务
           </CardTitle>
-          <CardDescription>配置智能交付时间预测所需的API服务</CardDescription>
+          <CardDescription>配置高德地图API服务，包括地理编码、路线规划、天气预报等功能</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* 高德地图API */}
+          {/* 高德地图API基础配置 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
@@ -428,7 +428,7 @@ API使用说明：
                   {renderStatusBadge(integrations.amapService.status)}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  用于路况查询和地理编码服务
+                  提供地图显示、地理编码、路线规划等基础服务
                 </p>
               </div>
               <Switch
@@ -482,10 +482,39 @@ API使用说明：
                     </a>
                   </Button>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  <p>• 支持实时路况查询</p>
-                  <p>• 地理编码和逆地理编码</p>
-                  <p>• 路径规划和导航</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium">地图服务</span>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• 地图显示和交互</p>
+                      <p>• 实时路况查询</p>
+                      <p>• 车辆位置跟踪</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium">地理编码服务</span>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• 地址转坐标（地理编码）</p>
+                      <p>• 坐标转地址（逆地理编码）</p>
+                      <p>• 批量地址解析</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium">路线规划</span>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• 多点路径规划</p>
+                      <p>• 实时路况优化</p>
+                      <p>• 最短时间/距离算法</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium">定位服务</span>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• GPS定位</p>
+                      <p>• 网络定位</p>
+                      <p>• 位置纠偏</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -493,17 +522,17 @@ API使用说明：
 
           <Separator />
 
-          {/* 天气服务 */}
+          {/* 天气预报服务 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Cloud className="h-4 w-4" />
-                  <span className="font-medium">天气服务</span>
+                  <span className="font-medium">天气预报服务</span>
                   {renderStatusBadge(integrations.weatherService.status)}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  实时天气数据，影响运输时间预测
+                  基于高德API的实时天气数据，用于运输时间预测优化
                 </p>
               </div>
               <Switch
@@ -515,13 +544,13 @@ API使用说明：
             {integrations.weatherService.enabled && (
               <div className="space-y-3 p-4 bg-muted rounded-lg">
                 <div className="space-y-2">
-                  <Label htmlFor="weather-api-key">高德天气API密钥</Label>
+                  <Label htmlFor="weather-api-key">API密钥（共用高德地图密钥）</Label>
                   <div className="flex gap-2">
                     <div className="relative flex-1">
                       <Input
                         id="weather-api-key"
                         type={showApiKeys.weather ? "text" : "password"}
-                        placeholder="使用高德地图API密钥"
+                        placeholder="将使用高德地图API密钥"
                         value={integrations.weatherService.apiKey || integrations.amapService.apiKey}
                         onChange={(e) => setIntegrations(prev => ({
                           ...prev,
@@ -557,11 +586,23 @@ API使用说明：
                     </a>
                   </Button>
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  <p>• 实时天气状况</p>
-                  <p>• 温度、湿度、风速</p>
-                  <p>• 天气预报数据</p>
-                  <p>• 恶劣天气预警</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium">实时天气</span>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• 当前天气状况</p>
+                      <p>• 温度、湿度、风速</p>
+                      <p>• 能见度数据</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="text-sm font-medium">天气预报</span>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p>• 未来4天预报</p>
+                      <p>• 天气变化趋势</p>
+                      <p>• 恶劣天气预警</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

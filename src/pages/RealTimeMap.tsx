@@ -325,10 +325,6 @@ export default function RealTimeMap() {
             <Filter className="h-4 w-4 mr-2" />
             筛选
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowApiKeyDialog(true)}>
-            <Settings className="h-4 w-4 mr-2" />
-            配置
-          </Button>
         </div>
       </div>
 
