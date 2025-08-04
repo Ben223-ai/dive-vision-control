@@ -142,7 +142,7 @@ async function createOrder(orderData: CreateOrderRequest): Promise<CreateOrderRe
       item_description: item.item_description || null,
       quantity: item.quantity,
       unit_price: item.unit_price,
-      total_price: item.quantity * item.unit_price,
+      // 不设置 total_price，让数据库自动计算
       weight: item.weight || null,
       volume: item.volume || null,
       sku: item.sku || null,
