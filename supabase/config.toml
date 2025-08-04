@@ -1,5 +1,8 @@
 project_id = "dvrnufiqmqcziqpnehyz"
 
+[functions.generate-jwt-token]
+verify_jwt = false
+
 [api]
 enabled = true
 port = 54321
