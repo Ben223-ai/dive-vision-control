@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageGuard, PERMISSIONS } from "@/components/permission";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
+import JwtTokenGenerator from "@/components/settings/JwtTokenGenerator";
 
 interface ApiKey {
   id: string;
@@ -146,6 +147,9 @@ const ApiManagement = () => {
                     <Key className="h-4 w-4" />
                     API密钥
                   </TabsTrigger>
+                  <TabsTrigger value="jwt" className="flex items-center gap-2">
+                    🔐 JWT Token
+                  </TabsTrigger>
                   <TabsTrigger value="usage" className="flex items-center gap-2">
                     <Activity className="h-4 w-4" />
                     使用记录
@@ -278,6 +282,10 @@ const ApiManagement = () => {
                       </p>
                     </CardContent>
                   </Card>
+                </TabsContent>
+
+                <TabsContent value="jwt">
+                  <JwtTokenGenerator />
                 </TabsContent>
 
                 <TabsContent value="docs">
