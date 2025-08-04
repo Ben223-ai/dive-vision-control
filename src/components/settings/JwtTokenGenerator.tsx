@@ -29,30 +29,29 @@ const JwtTokenGenerator = () => {
 
     setLoading(true);
     try {
-      const now = Math.floor(Date.now() / 1000);
-      const exp = now + (parseInt(expirationHours) * 3600);
+      const response = await fetch(
+        `https://dvrnufiqmqcziqpnehyz.supabase.co/functions/v1/generate-jwt-token`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            permissions: permissions.split(',').map(p => p.trim()).filter(p => p),
+            expirationHours: parseInt(expirationHours)
+          })
+        }
+      );
+
+      const result = await response.json();
       
-      const payload: JwtPayload = {
-        sub: userId,
-        permissions: permissions.split(',').map(p => p.trim()).filter(p => p),
-        iat: now,
-        exp: exp
-      };
-
-      // 生成JWT token
-      const header = {
-        alg: 'HS256',
-        typ: 'JWT'
-      };
-
-      const encodedHeader = btoa(JSON.stringify(header)).replace(/[+/]/g, (m) => ({ '+': '-', '/': '_' }[m] || '')).replace(/=/g, '');
-      const encodedPayload = btoa(JSON.stringify(payload)).replace(/[+/]/g, (m) => ({ '+': '-', '/': '_' }[m] || '')).replace(/=/g, '');
-
-      // 这里只是示例，实际的签名需要在服务器端生成
-      const token = `${encodedHeader}.${encodedPayload}.signature_placeholder`;
-      
-      setGeneratedToken(token);
-      toast.success('JWT Token生成成功');
+      if (result.success) {
+        setGeneratedToken(result.token);
+        toast.success('JWT Token生成成功');
+      } else {
+        toast.error(result.error || '生成JWT Token失败');
+      }
     } catch (error) {
       console.error('生成JWT Token失败:', error);
       toast.error('生成JWT Token失败');
@@ -129,7 +128,7 @@ const JwtTokenGenerator = () => {
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground">
-                注意：这只是一个示例token，实际使用需要服务器端正确签名
+                这是一个有效的JWT Token，可以直接用于API测试
               </p>
             </div>
           )}
