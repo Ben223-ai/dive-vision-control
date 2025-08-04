@@ -9,6 +9,7 @@ import { IntegrationSettings } from "@/components/settings/IntegrationSettings";
 import PermissionManagement from "@/components/settings/PermissionManagement";
 import AdvancedPermissionConfig from "@/components/settings/AdvancedPermissionConfig";
 import DataPermissionConfig from "@/components/settings/DataPermissionConfig";
+import ApiManagement from "@/components/settings/ApiManagement";
 
 const Settings = () => {
   return (
@@ -21,7 +22,7 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="profile">用户资料</TabsTrigger>
           <TabsTrigger value="preferences">应用偏好</TabsTrigger>
           <TabsTrigger value="system">系统配置</TabsTrigger>
@@ -29,6 +30,7 @@ const Settings = () => {
           <TabsTrigger value="security">安全设置</TabsTrigger>
           <TabsTrigger value="permissions">权限管理</TabsTrigger>
           <TabsTrigger value="integrations">集成设置</TabsTrigger>
+          <TabsTrigger value="api">API管理</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-4">
@@ -130,6 +132,20 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               <IntegrationSettings />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="api" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>API管理</CardTitle>
+              <CardDescription>
+                管理第三方API访问密钥和使用情况
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ApiManagement />
             </CardContent>
           </Card>
         </TabsContent>
