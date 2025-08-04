@@ -86,11 +86,27 @@ enabled = false
 enabled = true
 port = 54329
 
-[functions.ai-alert-engine]
+[functions.create-order-api]
+
+[functions.create-order-jwt-api]
+verify_jwt = false
+
+[functions.webhook-order-api]
+verify_jwt = false
+
+[functions.amap-geocoding]
+
+[functions.anomaly-detection]
+
+[functions.cost-prediction]
+
+[functions.delivery-time-prediction]
 verify_jwt = false
 
 [functions.order-details-api]
 verify_jwt = false
 
-[functions.delivery-time-prediction]
+[functions.route-optimization]
+
+[functions.ai-alert-engine]
 verify_jwt = false
