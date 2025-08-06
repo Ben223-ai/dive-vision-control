@@ -391,6 +391,36 @@ export type Database = {
         }
         Relationships: []
       }
+      initial_users: {
+        Row: {
+          brand_access: string[]
+          created_at: string | null
+          email: string
+          id: string
+          notes: string | null
+          password: string
+          role: string
+        }
+        Insert: {
+          brand_access: string[]
+          created_at?: string | null
+          email: string
+          id?: string
+          notes?: string | null
+          password: string
+          role?: string
+        }
+        Update: {
+          brand_access?: string[]
+          created_at?: string | null
+          email?: string
+          id?: string
+          notes?: string | null
+          password?: string
+          role?: string
+        }
+        Relationships: []
+      }
       issues: {
         Row: {
           assigned_to: string | null
