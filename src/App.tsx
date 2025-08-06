@@ -2,9 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./contexts/AuthContext";
-import { PermissionProvider, PageGuard, PERMISSIONS } from "./components/permission";
+import { Routes, Route } from "react-router-dom";
+import { PermissionProvider } from "./components/permission";
 import Index from "./pages/Index";
 import Orders from "./pages/Orders";
 import Alerts from "./pages/Alerts";
@@ -18,36 +17,11 @@ import CostPrediction from "./pages/CostPrediction";
 import RouteOptimization from "./pages/RouteOptimization";
 import FormDesigner from "./pages/FormDesigner";
 import ApiManagement from "./pages/ApiManagement";
-import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
 import Header from "./components/layout/Header";
-import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
-
-// 受保护的路由组件
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return (
-    <PermissionProvider>
-      {children}
-    </PermissionProvider>
-  );
-}
 
 // 布局组件
 function AppLayout({ children }: { children: React.ReactNode }) {
@@ -69,85 +43,50 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/" element={
-          <ProtectedRoute>
-            <Index />
-          </ProtectedRoute>
-        } />
-        <Route path="/orders" element={
-          <ProtectedRoute>
-            <Orders />
-          </ProtectedRoute>
-        } />
-        <Route path="/alerts" element={
-          <ProtectedRoute>
-            <Alerts />
-          </ProtectedRoute>
-        } />
-        <Route path="/map" element={
-          <ProtectedRoute>
+      <PermissionProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/alerts" element={<Alerts />} />
+          <Route path="/map" element={
             <AppLayout>
               <RealTimeMap />
             </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/analytics" element={
-          <ProtectedRoute>
+          } />
+          <Route path="/analytics" element={
             <AppLayout>
               <Analytics />
             </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/anomaly-detection" element={
-          <ProtectedRoute>
+          } />
+          <Route path="/anomaly-detection" element={
             <AppLayout>
               <AnomalyDetection />
             </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/cost-prediction" element={
-          <ProtectedRoute>
+          } />
+          <Route path="/cost-prediction" element={
             <AppLayout>
               <CostPrediction />
             </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/route-optimization" element={
-          <ProtectedRoute>
+          } />
+          <Route path="/route-optimization" element={
             <AppLayout>
               <RouteOptimization />
             </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/communication" element={
-          <ProtectedRoute>
-            <Communication />
-          </ProtectedRoute>
-        } />
-        <Route path="/settings" element={
-          <ProtectedRoute>
+          } />
+          <Route path="/communication" element={<Communication />} />
+          <Route path="/settings" element={
             <AppLayout>
               <Settings />
             </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/form-designer" element={
-          <ProtectedRoute>
-            <FormDesigner />
-          </ProtectedRoute>
-        } />
-        <Route path="/api-management" element={
-          <ProtectedRoute>
-            <ApiManagement />
-          </ProtectedRoute>
-        } />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          } />
+          <Route path="/form-designer" element={<FormDesigner />} />
+          <Route path="/api-management" element={<ApiManagement />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PermissionProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

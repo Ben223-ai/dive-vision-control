@@ -1,6 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface PermissionContextType {
   permissions: string[];
@@ -14,44 +13,28 @@ interface PermissionContextType {
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
 
 export function PermissionProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
   const [permissions, setPermissions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const fetchPermissions = async () => {
-    if (!user) {
-      setPermissions([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      
-      // 调用获取用户权限的函数
-      const { data, error } = await supabase.rpc('get_user_permissions', {
-        _user_id: user.id
-      });
-
-      if (error) throw error;
-
-      // 提取权限编码列表
-      const permissionCodes = data
-        ?.filter((p: any) => p.granted)
-        .map((p: any) => p.permission_code) || [];
-
-      setPermissions(permissionCodes);
-    } catch (error) {
-      console.error('获取用户权限失败:', error);
-      setPermissions([]);
-    } finally {
-      setLoading(false);
-    }
+    // 无认证模式，给予所有权限
+    setPermissions([
+      'system.admin',
+      'orders.view',
+      'orders.create',
+      'orders.edit',
+      'orders.delete',
+      'analytics.view',
+      'reports.view',
+      'settings.system',
+      'settings.user'
+    ]);
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchPermissions();
-  }, [user]);
+  }, []);
 
   const hasPermission = (permissionCode: string): boolean => {
     return permissions.includes(permissionCode);

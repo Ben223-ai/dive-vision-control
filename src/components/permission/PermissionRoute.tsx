@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { usePermission } from '@/contexts/PermissionContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Lock } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -33,14 +32,8 @@ export function PermissionRoute({
   showNoPermissionPage = true,
   children
 }: PermissionRouteProps) {
-  const { user } = useAuth();
   const { hasPermission, hasAnyPermission, hasAllPermissions, loading } = usePermission();
   const location = useLocation();
-
-  // 用户未登录，重定向到登录页
-  if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
 
   // 权限加载中
   if (loading) {
