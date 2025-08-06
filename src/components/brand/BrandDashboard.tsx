@@ -19,7 +19,39 @@ interface StageData {
   color: string;
 }
 
-export default function BrandDashboard() {
+interface Brand {
+  id: string;
+  name: string;
+  logo: string;
+  color: string;
+  description: string;
+}
+
+interface BrandDashboardProps {
+  selectedBrand: Brand;
+}
+
+// 模拟不同品牌的数据
+const BRAND_DATA = {
+  hennessy: {
+    orders: 20000, production: 10000, shipping: 5000, inTransit: 5000,
+    unitPrice: 150, colors: { primary: "bg-amber-600", production: "bg-orange-500", shipping: "bg-green-500", transit: "bg-purple-500" }
+  },
+  "louis-vuitton": {
+    orders: 8000, production: 4000, shipping: 2000, inTransit: 2000,
+    unitPrice: 800, colors: { primary: "bg-stone-800", production: "bg-orange-500", shipping: "bg-green-500", transit: "bg-purple-500" }
+  },
+  "moet-chandon": {
+    orders: 15000, production: 7500, shipping: 3750, inTransit: 3750,
+    unitPrice: 200, colors: { primary: "bg-emerald-600", production: "bg-orange-500", shipping: "bg-green-500", transit: "bg-purple-500" }
+  },
+  "tag-heuer": {
+    orders: 3000, production: 1500, shipping: 750, inTransit: 750,
+    unitPrice: 2000, colors: { primary: "bg-red-600", production: "bg-orange-500", shipping: "bg-green-500", transit: "bg-purple-500" }
+  }
+};
+
+export default function BrandDashboard({ selectedBrand }: BrandDashboardProps) {
   const [metrics, setMetrics] = useState<BrandMetrics | null>(null);
   const [stageData, setStageData] = useState<StageData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,16 +59,14 @@ export default function BrandDashboard() {
   useEffect(() => {
     // 模拟品牌方数据加载
     setTimeout(() => {
-      const totalOrders = 20000;
-      const production = 10000;
-      const shipping = 5000;
-      const inTransit = 5000;
+      const brandData = BRAND_DATA[selectedBrand.id as keyof typeof BRAND_DATA] || BRAND_DATA.hennessy;
+      const { orders: totalOrders, production, shipping, inTransit, unitPrice } = brandData;
 
       setMetrics({
-        orders: { total: totalOrders, value: totalOrders * 150 },
-        production: { total: production, value: production * 150 },
-        shipping: { total: shipping, value: shipping * 150 },
-        inTransit: { total: inTransit, value: inTransit * 150 }
+        orders: { total: totalOrders, value: totalOrders * unitPrice },
+        production: { total: production, value: production * unitPrice },
+        shipping: { total: shipping, value: shipping * unitPrice },
+        inTransit: { total: inTransit, value: inTransit * unitPrice }
       });
 
       setStageData([
@@ -72,7 +102,7 @@ export default function BrandDashboard() {
 
       setLoading(false);
     }, 1000);
-  }, []);
+  }, [selectedBrand]);
 
   if (loading) {
     return (
@@ -92,10 +122,10 @@ export default function BrandDashboard() {
       <Card className="shadow-elegant">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">H</span>
+            <div className={`w-8 h-8 ${selectedBrand.color} rounded-lg flex items-center justify-center`}>
+              <span className="text-white font-bold text-sm">{selectedBrand.logo}</span>
             </div>
-            轩尼诗 - 业务总览
+            {selectedBrand.name} - 业务总览
           </CardTitle>
         </CardHeader>
         <CardContent>
