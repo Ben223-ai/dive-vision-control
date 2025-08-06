@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { LogIn, LogOut } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LogIn, LogOut, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import BrandDashboard from "@/components/brand/BrandDashboard";
@@ -78,6 +79,26 @@ export default function BrandPortal() {
     setLoading(false);
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/brand-portal`
+      }
+    });
+
+    if (error) {
+      toast.error("注册失败: " + error.message);
+    } else {
+      toast.success("注册成功！请检查邮箱进行验证");
+    }
+    setLoading(false);
+  };
+
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -89,44 +110,91 @@ export default function BrandPortal() {
 
   const currentBrand = BRANDS.find(brand => brand.id === selectedBrand.id) || BRANDS[0];
 
-  // Show login form if not authenticated
+  // Show login/register form if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md shadow-elegant">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-foreground">品牌方登录</CardTitle>
-            <p className="text-muted-foreground">请登录访问品牌专属工作台</p>
+            <p className="text-muted-foreground">请登录或注册访问品牌专属工作台</p>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">邮箱</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="请输入邮箱"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">密码</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="请输入密码"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                <LogIn className="h-4 w-4 mr-2" />
-                {loading ? "登录中..." : "登录"}
-              </Button>
-            </form>
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">登录</TabsTrigger>
+                <TabsTrigger value="register">注册</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">邮箱</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="请输入邮箱"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">密码</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="请输入密码"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    <LogIn className="h-4 w-4 mr-2" />
+                    {loading ? "登录中..." : "登录"}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-email">邮箱</Label>
+                    <Input
+                      id="reg-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="请输入邮箱"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="reg-password">密码</Label>
+                    <Input
+                      id="reg-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="请输入密码 (至少6位)"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    {loading ? "注册中..." : "注册"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+            
+            <div className="mt-4 p-3 bg-muted rounded-lg">
+              <p className="text-xs text-muted-foreground font-semibold">测试账号：</p>
+              <p className="text-xs text-muted-foreground">hennessy@test.com / Hennessy123!</p>
+              <p className="text-xs text-muted-foreground">lv@test.com / LouisVuitton123!</p>
+            </div>
           </CardContent>
         </Card>
       </div>
