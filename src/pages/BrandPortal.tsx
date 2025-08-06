@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Share, Copy } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LogIn, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import BrandDashboard from "@/components/brand/BrandDashboard";
 
 const BRANDS = [
@@ -39,14 +42,96 @@ const BRANDS = [
 
 export default function BrandPortal() {
   const [selectedBrand, setSelectedBrand] = useState(BRANDS[0]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleShareDashboard = () => {
-    const dashboardUrl = `${window.location.origin}/brand-portal?brand=${selectedBrand.id}`;
-    navigator.clipboard.writeText(dashboardUrl);
-    toast.success("看板链接已复制到剪贴板");
+  useEffect(() => {
+    // Check if user is already authenticated
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      toast.error("登录失败: " + error.message);
+    } else {
+      toast.success("登录成功");
+    }
+    setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast.error("登出失败: " + error.message);
+    } else {
+      toast.success("已安全登出");
+    }
   };
 
   const currentBrand = BRANDS.find(brand => brand.id === selectedBrand.id) || BRANDS[0];
+
+  // Show login form if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Card className="w-full max-w-md shadow-elegant">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-foreground">品牌方登录</CardTitle>
+            <p className="text-muted-foreground">请登录访问品牌专属工作台</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">邮箱</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="请输入邮箱"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">密码</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="请输入密码"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                <LogIn className="h-4 w-4 mr-2" />
+                {loading ? "登录中..." : "登录"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -83,45 +168,14 @@ export default function BrandPortal() {
           <Button 
             variant="outline" 
             size="sm" 
-            onClick={handleShareDashboard}
+            onClick={handleLogout}
             className="gap-2"
           >
-            <Share className="h-4 w-4" />
-            分享看板
+            <LogOut className="h-4 w-4" />
+            登出
           </Button>
         </div>
       </div>
-
-      {/* 品牌链接分享卡片 */}
-      <Card className="border-dashed">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Share className="h-4 w-4" />
-            专属看板链接
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 px-3 py-2 bg-muted rounded text-sm font-mono">
-              {window.location.origin}/brand-portal?brand={selectedBrand.id}
-            </code>
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              onClick={() => {
-                const url = `${window.location.origin}/brand-portal?brand=${selectedBrand.id}`;
-                navigator.clipboard.writeText(url);
-                toast.success("链接已复制");
-              }}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            此链接可直接分享给{currentBrand.name}品牌相关人员访问专属看板
-          </p>
-        </CardContent>
-      </Card>
 
       <BrandDashboard selectedBrand={selectedBrand} />
     </div>
