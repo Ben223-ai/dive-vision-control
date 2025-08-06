@@ -17,6 +17,8 @@ import CostPrediction from "./pages/CostPrediction";
 import RouteOptimization from "./pages/RouteOptimization";
 import FormDesigner from "./pages/FormDesigner";
 import ApiManagement from "./pages/ApiManagement";
+import ProductionAnalysis from "./pages/ProductionAnalysis";
+import BrandPortal from "./pages/BrandPortal";
 import NotFound from "./pages/NotFound";
 import Sidebar from "./components/layout/Sidebar";
 import Header from "./components/layout/Header";
@@ -83,6 +85,16 @@ const App = () => (
           } />
           <Route path="/form-designer" element={<FormDesigner />} />
           <Route path="/api-management" element={<ApiManagement />} />
+          <Route path="/production-analysis" element={
+            <AppLayout>
+              <ProductionAnalysis />
+            </AppLayout>
+          } />
+          <Route path="/brand-portal" element={
+            <AppLayout>
+              <BrandPortal />
+            </AppLayout>
+          } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
